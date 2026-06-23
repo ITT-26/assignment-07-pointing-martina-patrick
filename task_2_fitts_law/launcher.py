@@ -1,7 +1,8 @@
 import argparse
 import json
+import pyglet
 
-from task_2_fitts_law.fitts_law import FittsLawApp, WINDOW_HEIGHT, WINDOW_WIDTH
+from fitts_law import FittsLawApp, WINDOW_HEIGHT, WINDOW_WIDTH
 
 
 # the user can either provide the path to a config file or the individual parameters
@@ -47,7 +48,7 @@ def main() -> None:
             args.radius,
             args.num_targets,
         ]
-        if not all(required_params):
+        if not all(p is not None for p in required_params):
             parser.error(
                 "If no config file provided, you must specify: --participant_id, --repetitions, --input_method, --delay, --distance, --radius, --num_targets"
             )
@@ -71,6 +72,7 @@ def main() -> None:
 
     # run app
     app = FittsLawApp(fitts_config)
+    pyglet.app.run()
 
 
 # loads a json config file

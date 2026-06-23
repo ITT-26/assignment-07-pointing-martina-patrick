@@ -25,7 +25,9 @@ class FittsLawApp:
         self.input_method = config["input_method"]
         self.delay = config["delay"]
         self.conditions = config["conditions"]
-        self.multiple_conditions = len(self.conditions) > 1
+        self.multiple_conditions = (
+            len(self.conditions) > 1
+        )  # not sure if I'm going to use this after all, rev.
 
         # log file
         self.log_file = None
@@ -34,6 +36,9 @@ class FittsLawApp:
         self.window = pyglet.window.Window(
             width=WINDOW_WIDTH, height=WINDOW_HEIGHT, caption="Fitts' Law"
         )
+        # bg color
+        pyglet.gl.glClearColor(*[c / 255.0 for c in BG_COLOR], 1.0)
+        self.window.on_draw = self.on_draw
 
         # init state
         self.current_condition_index = 0
@@ -72,7 +77,7 @@ class FittsLawApp:
             circle = pyglet.shapes.Circle(x, y, radius, color=TARGET_COLOR)
             self.targets.append({"circle": circle, "x": x, "y": y, "index": n})
 
-        # random starting target, pre-compute target order
+        # random initial target, pre-compute target order
         start = random.randint(0, num_targets - 1)
         self.sequence = []
         for i in range(num_targets // 2):
@@ -91,3 +96,23 @@ class FittsLawApp:
             "iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,timestamp\n"
         )
         self.log_file.flush()
+
+    def on_draw(self):
+        self.window.clear()
+        for target in self.targets:
+            target["circle"].draw()
+
+    def update(self, dt):
+        pass
+
+
+# TODO:
+# - handle mouse click events: check if click lands on current target (distance to center <= radius)
+# - on successful click: log the trial, advance current_target_index, highlight next target
+# - on last target in sequence: increment current_repetition, reset sequence (new random start)
+# - on last repetition: if more conditions, close log, setup_condition(), setup_logging(); else game_state = "experiment_done"
+# - draw init screen (game_state == "init_screen"), start trial on keypress
+# - draw completion screen (game_state == "experiment_done")
+# - handle pose input (with Patrick's work)
+# - correct paths, folders for results and config
+# - test sample config file for continuous run (although this is for Task 5 mainly)
