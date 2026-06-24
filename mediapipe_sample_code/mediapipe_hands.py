@@ -10,14 +10,14 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from hand_landmark_drawer import draw_landmarks_on_image
 
-VIDEO_ID = int(sys.argv[1])
-NUM_HANDS = int(sys.argv[2])
+#VIDEO_ID = int(sys.argv[1])
+#NUM_HANDS = int(sys.argv[2])
 MODEL_PATH = './hand_landmarker.task'
 
 # Create an HandLandmarker object.
 OPTIONS = vision.HandLandmarkerOptions(
     base_options=python.BaseOptions(model_asset_path=MODEL_PATH),
-    num_hands=NUM_HANDS,
+    num_hands=1,
     running_mode=vision.RunningMode.VIDEO,
     min_hand_detection_confidence=0.5,
     min_hand_presence_confidence=0.5,
@@ -25,7 +25,7 @@ OPTIONS = vision.HandLandmarkerOptions(
 )
 detector = vision.HandLandmarker.create_from_options(OPTIONS)
 
-cap = cv2.VideoCapture(VIDEO_ID)
+cap = cv2.VideoCapture(0)
 
 while True:
     # Capture a frame from the webcam

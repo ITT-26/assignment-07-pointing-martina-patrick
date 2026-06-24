@@ -1,1 +1,0 @@
-# here goes your mediapipe-to-pointer implementation
