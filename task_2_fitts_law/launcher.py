@@ -140,9 +140,9 @@ def validate_config(config: dict) -> None:
             )
 
         # check if targets fit on screen
-        MAX_DISTANCE_FROM_CENTER = min(WINDOW_WIDTH, WINDOW_HEIGHT) / 2 - 50
+        MAX_DISTANCE_FROM_CENTER = min(WINDOW_WIDTH, WINDOW_HEIGHT) / 2
 
-        farthest_point = condition["distance"] + condition["radius"]
+        farthest_point = condition["distance"]/2 + condition["radius"]
         if farthest_point > MAX_DISTANCE_FROM_CENTER:
             raise ValueError(
                 f"Condition {i}: targets don't fit on screen. "

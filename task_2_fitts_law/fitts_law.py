@@ -4,6 +4,7 @@ import pyglet
 import time
 import math
 import random
+import pathlib
 
 # window setup parameters
 WINDOW_WIDTH = 800
@@ -13,7 +14,8 @@ WINDOW_HEIGHT = 800
 TARGET_COLOR = (45, 130, 183)  # blue
 CURRENT_TARGET_COLOR = (185, 98, 45)  # orange
 POINTER_COLOR = (200, 50, 50)  # red
-TEXT_COLOR = (255, 255, 255)  # white
+BODY_TEXT_COLOR = (255, 255, 255)  # white
+COMMANDS_TEXT_COLOR = (0, 255, 0)   # green
 BG_COLOR = (40, 40, 40)  # dark gray
 
 
@@ -25,9 +27,6 @@ class FittsLawApp:
         self.input_method = config["input_method"]
         self.delay = config["delay"]
         self.conditions = config["conditions"]
-        self.multiple_conditions = (
-            len(self.conditions) > 1
-        )  # not sure if I'm going to use this after all, rev.
 
         # log file
         self.log_file = None
@@ -38,20 +37,25 @@ class FittsLawApp:
         )
         # bg color
         pyglet.gl.glClearColor(*[c / 255.0 for c in BG_COLOR], 1.0)
+        # callbacks
         self.window.on_draw = self.on_draw
+        self.window.on_mouse_press = self.on_mouse_press
+        self.window.on_key_press = self.on_key_press
 
         # init state
         self.current_condition_index = 0
         self.current_repetition = 0
         self.current_target_index = 0
-        self.game_state = "init_screen"  # "init_screen", "trial_running", "iteration_complete", "condition_complete", "experiment_done"
+        self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
 
-        # first (or only) condition display setup
-        self.setup_condition()
-        self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
+        # condition-specific parameters
+        self.num_targets = None
+        self.radius = None
+        self.distance = None
+        self.repetitions = None
 
-        # logging setup
-        self.setup_logging()
+        # first (or only) condition setup
+        self.setup_condition()  # here the current condition's condition-specific parameters are updated
 
         # track time for timestamps
         self.trial_start_time = None  # it starts once the user clicks
@@ -59,37 +63,38 @@ class FittsLawApp:
         # pyglet update loop scheduling
         pyglet.clock.schedule_interval(self.update, 1 / 60.0)
 
-    def setup_condition(self):
+    def random_start(self):
         num_targets = self.conditions[self.current_condition_index]["num_targets"]
-        radius = self.conditions[self.current_condition_index]["radius"]
-        distance = self.conditions[self.current_condition_index]["distance"]
-        repetitions = self.conditions[self.current_condition_index]["repetitions"]
+        start = random.randint(0, num_targets - 1)
+        self.sequence = []
+        for i in range(num_targets // 2):
+            self.sequence.append((start + i) % num_targets)
+            self.sequence.append((start + i + num_targets // 2) % num_targets)
+        
+    def setup_condition(self):
+        self.num_targets = self.conditions[self.current_condition_index]["num_targets"]
+        self.radius = self.conditions[self.current_condition_index]["radius"]
+        self.distance = self.conditions[self.current_condition_index]["distance"]
+        self.repetitions = self.conditions[self.current_condition_index]["repetitions"]
 
         # get center of the window
         center_x = WINDOW_WIDTH / 2
         center_y = WINDOW_HEIGHT / 2
 
         self.targets = []
-        for n in range(num_targets):
-            angle = (2 * math.pi * n) / num_targets
-            x = center_x + (distance / 2) * math.cos(angle)
-            y = center_y + (distance / 2) * math.sin(angle)
-            circle = pyglet.shapes.Circle(x, y, radius, color=TARGET_COLOR)
+        for n in range(self.num_targets):
+            angle = (2 * math.pi * n) / self.num_targets
+            x = center_x + (self.distance / 2) * math.cos(angle)
+            y = center_y + (self.distance / 2) * math.sin(angle)
+            circle = pyglet.shapes.Circle(x, y, self.radius, color=TARGET_COLOR)
             self.targets.append({"circle": circle, "x": x, "y": y, "index": n})
 
-        # random initial target, pre-compute target order
-        start = random.randint(0, num_targets - 1)
-        self.sequence = []
-        for i in range(num_targets // 2):
-            self.sequence.append((start + i) % num_targets)
-            self.sequence.append((start + i + num_targets // 2) % num_targets)
-
     def setup_logging(self):
-        condition = self.conditions[self.current_condition_index]
+        pathlib.Path("results").mkdir(exist_ok=True)
         filename = (
-            f"fitts_{self.participant_id}_{self.input_method}_"
-            f"{self.delay}ms_{condition['num_targets']}_"
-            f"{condition['radius']}_{condition['distance']}.csv"
+            f"results/fitts_{self.participant_id}_{self.input_method}_"
+            f"{self.delay}ms_{self.num_targets}_"
+            f"{self.radius}_{self.distance}.csv"
         )
         self.log_file = open(filename, "w")
         self.log_file.write(
@@ -97,22 +102,181 @@ class FittsLawApp:
         )
         self.log_file.flush()
 
+    def log(self, target_id):
+        condition = self.conditions[self.current_condition_index]
+        timestamp = int((time.time() - self.trial_start_time) * 1000)
+        self.log_file.write(
+            f"{self.current_repetition},{self.participant_id},{self.input_method},{self.delay},"
+            f"{self.num_targets},{self.radius},{self.distance},"
+            f"{target_id},{timestamp}\n"
+        )
+        self.log_file.flush()
+
+    def handle_transition(self):
+        if self.current_target_index < self.num_targets - 1:
+            # increment current target index
+            self.current_target_index += 1
+        elif self.current_target_index == self.num_targets - 1:
+            if self.current_repetition < self.repetitions - 1:
+                # increment current repetition
+                self.current_repetition += 1
+                # reset target index
+                self.current_target_index = 0
+                # setup new start
+                self.random_start()
+                self.game_state = "repetition_complete"
+            else:
+                if self.current_condition_index < len(self.conditions) - 1:
+                    # increment current condition
+                    self.current_condition_index += 1
+                    # reset repetition tracker
+                    self.current_repetition = 0
+                    # setup new condition and logging
+                    self.setup_condition()
+                    # close current file
+                    if self.log_file:
+                        self.log_file.close()
+                    self.setup_logging()
+                    self.game_state = "condition_complete"
+                else:
+                    self.game_state = "experiment_done"
+
+    def update_visuals(self, old_target):
+        old_target["circle"].color = TARGET_COLOR
+        if self.game_state == "trial_running":
+            self.targets[self.sequence[self.current_target_index]][
+                "circle"
+            ].color = CURRENT_TARGET_COLOR
+
+    def handle_click(self, x, y):
+        # we only care about the target at the current index
+        # we want to check whether x, y are inside target_x +- radius, target_y +- radius
+        current_target = self.targets[self.sequence[self.current_target_index]]
+        distance = math.sqrt(
+            (x - current_target["x"]) ** 2 + (y - current_target["y"]) ** 2
+        )
+        if distance <= self.radius:
+            # log
+            target_id = current_target["index"]
+            self.log(target_id)
+            old_target = self.targets[self.sequence[self.current_target_index]]
+            # handle transition to next target/end of repetition or condition
+            self.handle_transition()
+            # update screen
+            self.update_visuals(old_target)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        if self.game_state == "trial_running":
+            if self.input_method == "mouse" or self.input_method == "touchpad":
+                if button == pyglet.window.mouse.LEFT:
+                    self.handle_click(x, y)
+
+            # elif self.input_method == "pose":
+            #     pass
+            #     # si la funcion de Patrick devuelve True para el click
+            #     # self.handle_click(x,y)
+
+    def on_key_press(self, symbol, modifiers):
+        if symbol == pyglet.window.key.Q or symbol == pyglet.window.key.ESCAPE:
+            pyglet.app.exit()
+        elif symbol == pyglet.window.key.SPACE:
+            if self.game_state == "init_screen":
+                self.game_state = "condition_complete"
+            elif self.game_state in ("repetition_complete", "condition_complete"):
+                if self.game_state == "condition_complete":
+                    self.setup_logging()
+                self.random_start()
+                self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
+                self.game_state = "trial_running"
+                self.trial_start_time = time.time()
+
+    def draw_init_screen(self):
+        # title
+        pyglet.text.Label(
+            "Fitts' Law Test",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 200,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=36,
+            color=(*BODY_TEXT_COLOR, 255)
+        ).draw()
+
+        # instructions
+        pyglet.text.Label(
+            "Point at and click on the orange target\nas fast as you can.",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 50,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=26,
+            color=(*BODY_TEXT_COLOR, 255),
+            multiline=True,
+            width=600,
+            align="center"
+        ).draw()
+
+        # show participant ID
+        pyglet.text.Label(
+            f"Participant ID: {self.participant_id}",
+            x=WINDOW_WIDTH // 2,
+            y=300,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=22,
+            color=(*BODY_TEXT_COLOR, 255)
+        ).draw()
+
+        # controls
+        pyglet.text.Label(
+            "[SPACE]: start/continue | 'q' / [ESC]: quit",
+            x=WINDOW_WIDTH // 2,
+            y=100,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=22,
+            color=(*COMMANDS_TEXT_COLOR, 255)
+        ).draw()
+
+    def draw_rep_complete_screen(self):
+        pass
+
+    def draw_condition_screen(self):
+        pass
+
+    def draw_exp_done_screen(self):
+        pass
+
+    def draw_hud(self):
+        pass
+
     def on_draw(self):
         self.window.clear()
-        for target in self.targets:
-            target["circle"].draw()
+        if self.game_state == "trial_running":
+            for target in self.targets:
+                target["circle"].draw()
+            self.draw_hud()
+        elif self.game_state == "init_screen":
+            self.draw_init_screen()
+        elif self.game_state == "repetition_complete":
+            self.draw_rep_complete_screen()
+        elif self.game_state == "condition_complete":
+            self.draw_condition_screen()
+        elif self.game_state == "experiment_done":
+            self.draw_exp_done_screen()
 
     def update(self, dt):
         pass
 
 
 # TODO:
-# - handle mouse click events: check if click lands on current target (distance to center <= radius)
-# - on successful click: log the trial, advance current_target_index, highlight next target
-# - on last target in sequence: increment current_repetition, reset sequence (new random start)
-# - on last repetition: if more conditions, close log, setup_condition(), setup_logging(); else game_state = "experiment_done"
+
 # - draw init screen (game_state == "init_screen"), start trial on keypress
 # - draw completion screen (game_state == "experiment_done")
+
+
 # - handle pose input (with Patrick's work)
 # - correct paths, folders for results and config
 # - test sample config file for continuous run (although this is for Task 5 mainly)
+
+# - if number of targets is low, maybe dont stop the rep after all have been clicked, instead make some extra cycles
