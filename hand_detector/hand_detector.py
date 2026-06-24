@@ -15,10 +15,9 @@ import time
 
 class HandDetector:
 
-    def __init__(self, mode: vision.RunningMode):
+    def __init__(self, mode: vision.RunningMode = vision.RunningMode.VIDEO):
         # Use this to select the mode for mp
         self.mode = mode
-
         self.mp_hands = mp.tasks.vision.HandLandmarksConnections
         self.mp_drawing = mp.tasks.vision.drawing_utils
         self.mp_drawing_styles = mp.tasks.vision.drawing_styles
@@ -102,7 +101,7 @@ class HandDetector:
             distance_middle_thumb = self.distance_between(middle_tip, thumb_tip)
             # Returns a percentage, meaning the top left point is 0, 0 and bottom right is 0, 0
             # Flip the X coord so it is actually correct and adjusts for the flipped camera image
-            return Pointer(index_tip.y, (index_tip.x * -1) + 1, distance_middle_thumb < 0.02)
+            return Pointer((index_tip.x * -1) + 1, index_tip.y, distance_middle_thumb < 0.02)
         return Pointer.invalid_pointer()
 
 
