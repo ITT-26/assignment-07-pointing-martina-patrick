@@ -12,7 +12,7 @@ from hand_detector.pointer import Pointer
 
 
 class PointingInput:
-    def __init__(self, video_id = 0, camera=False):
+    def __init__(self,  camera_deadzone, video_id = 0, camera=False):
         self.cap = cv2.VideoCapture(video_id)
         self.displays_img = camera
         if self.displays_img:
@@ -22,6 +22,7 @@ class PointingInput:
         self.mouse = Controller()
         self.screen_dimensions = self._get_screen_dims()
         self.is_clicked = False
+        self.cam_deadzone = .1 if camera_deadzone is None else camera_deadzone
 
 
     def _get_screen_dims(self):
@@ -58,9 +59,17 @@ class PointingInput:
             self.is_clicked = False
 
     def convert_relative_pos_to_absolute_pos(self, relative_x, relative_y):
-        abs_x = relative_y * self.screen_dimensions[0]
-        abs_y = relative_x * self.screen_dimensions[1]
+        relative_x = self._apply_deadzone(relative_x)
+        relative_y = self._apply_deadzone(relative_y)
+        abs_x = relative_x * self.screen_dimensions[0]
+        abs_y = relative_y * self.screen_dimensions[1]
         return abs_x, abs_y
+
+
+    def _apply_deadzone(self, val):
+        val = max(self.cam_deadzone, min(1 - self.cam_deadzone, val))
+        val = (val - self.cam_deadzone) / (1 - 2 * self.cam_deadzone)
+        return val
 
     def simulate_mouse(self, x, y, sim_click):
         self.mouse.position = (x, y)
