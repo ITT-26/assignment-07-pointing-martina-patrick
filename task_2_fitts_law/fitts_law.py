@@ -15,7 +15,7 @@ TARGET_COLOR = (45, 130, 183)  # blue
 CURRENT_TARGET_COLOR = (185, 98, 45)  # orange
 POINTER_COLOR = (200, 50, 50)  # red
 BODY_TEXT_COLOR = (255, 255, 255)  # white
-COMMANDS_TEXT_COLOR = (0, 255, 0)   # green
+COMMANDS_TEXT_COLOR = (0, 255, 0)  # green
 BG_COLOR = (40, 40, 40)  # dark gray
 
 
@@ -70,7 +70,7 @@ class FittsLawApp:
         for i in range(num_targets // 2):
             self.sequence.append((start + i) % num_targets)
             self.sequence.append((start + i + num_targets // 2) % num_targets)
-        
+
     def setup_condition(self):
         self.num_targets = self.conditions[self.current_condition_index]["num_targets"]
         self.radius = self.conditions[self.current_condition_index]["radius"]
@@ -199,7 +199,7 @@ class FittsLawApp:
             anchor_x="center",
             anchor_y="center",
             font_size=36,
-            color=(*BODY_TEXT_COLOR, 255)
+            color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
         # instructions
@@ -213,7 +213,7 @@ class FittsLawApp:
             color=(*BODY_TEXT_COLOR, 255),
             multiline=True,
             width=600,
-            align="center"
+            align="center",
         ).draw()
 
         # show participant ID
@@ -224,7 +224,7 @@ class FittsLawApp:
             anchor_x="center",
             anchor_y="center",
             font_size=22,
-            color=(*BODY_TEXT_COLOR, 255)
+            color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
         # controls
@@ -235,20 +235,120 @@ class FittsLawApp:
             anchor_x="center",
             anchor_y="center",
             font_size=22,
-            color=(*COMMANDS_TEXT_COLOR, 255)
+            color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
     def draw_rep_complete_screen(self):
-        pass
+        pyglet.text.Label(
+            "Repetition complete!",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 50,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=28,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        pyglet.text.Label(
+            f"Repetition {self.current_repetition} of {self.repetitions}",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=20,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        pyglet.text.Label(
+            "[SPACE]: continue | 'q' / [ESC]: quit",
+            x=WINDOW_WIDTH // 2,
+            y=100,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=22,
+            color=(*COMMANDS_TEXT_COLOR, 255),
+        ).draw()
 
     def draw_condition_screen(self):
-        pass
+        pyglet.text.Label(
+            "Next condition:",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 200,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=28,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        pyglet.text.Label(
+            f"Condition {self.current_condition_index + 1} of {len(self.conditions)}\n"
+            f"Targets: {self.num_targets}  |  Radius: {self.radius}  |  Distance: {self.distance}\n"
+            f"Repetitions: {self.repetitions}",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 50,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=20,
+            color=(*BODY_TEXT_COLOR, 255),
+            multiline=True,
+            width=600,
+            align="center",
+        ).draw()
+        pyglet.text.Label(
+            "[SPACE]: start | 'q' / [ESC]: quit",
+            x=WINDOW_WIDTH // 2,
+            y=100,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=22,
+            color=(*COMMANDS_TEXT_COLOR, 255),
+        ).draw()
 
     def draw_exp_done_screen(self):
-        pass
+        pyglet.text.Label(
+            "Experiment complete!",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 100,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=32,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        pyglet.text.Label(
+            "Thank you for participating.",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 30,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=20,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        pyglet.text.Label(
+            "'q' / [ESC]: quit",
+            x=WINDOW_WIDTH // 2,
+            y=100,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=22,
+            color=(*COMMANDS_TEXT_COLOR, 255),
+        ).draw()
 
     def draw_hud(self):
-        pass
+        pyglet.text.Label(
+            f"Rep {self.current_repetition + 1}/{self.repetitions}",
+            x=10,
+            y=WINDOW_HEIGHT - 30,
+            anchor_x="left",
+            anchor_y="center",
+            font_size=16,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        pyglet.text.Label(
+            f"Condition {self.current_condition_index + 1}/{len(self.conditions)}",
+            x=WINDOW_WIDTH - 10,
+            y=WINDOW_HEIGHT - 30,
+            anchor_x="right",
+            anchor_y="center",
+            font_size=20,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
 
     def on_draw(self):
         self.window.clear()
@@ -271,12 +371,9 @@ class FittsLawApp:
 
 # TODO:
 
-# - draw init screen (game_state == "init_screen"), start trial on keypress
-# - draw completion screen (game_state == "experiment_done")
-
+# CHANGE LOG AND CONFIG (PATRICK'S SUGGESTION DS)
 
 # - handle pose input (with Patrick's work)
 # - correct paths, folders for results and config
 # - test sample config file for continuous run (although this is for Task 5 mainly)
-
 # - if number of targets is low, maybe dont stop the rep after all have been clicked, instead make some extra cycles
