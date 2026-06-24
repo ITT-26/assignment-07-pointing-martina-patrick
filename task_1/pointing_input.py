@@ -12,10 +12,11 @@ from hand_detector.pointer import Pointer
 
 
 class PointingInput:
-    def __init__(self, video_id = 0):
+    def __init__(self, video_id = 0, camera=False):
         self.cap = cv2.VideoCapture(video_id)
-        self.frame = ...
-        cv2.namedWindow('frame')
+        self.displays_img = camera
+        if self.displays_img:
+            cv2.namedWindow('frame')
         # Init hand_detector.py
         self.hand_detector = HandDetector(vision.RunningMode.VIDEO)
         self.mouse = Controller()
@@ -46,7 +47,8 @@ class PointingInput:
     def update(self):
         ret, self.frame = self.cap.read()
         pointer, image = self.hand_detector.get_pointer_state(self.frame)
-        cv2.imshow("frame", image)
+        if self.displays_img:
+            cv2.imshow("frame", image)
         if pointer == Pointer.invalid_pointer():
             return
         screen_x, screen_y = self.convert_relative_pos_to_absolute_pos(pointer.x, pointer.y)
