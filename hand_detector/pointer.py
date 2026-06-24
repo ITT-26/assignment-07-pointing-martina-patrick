@@ -7,6 +7,9 @@ class Pointer:
     def __str__(self):
         return f'Pointer at {self.x}, {self.y} is {"clicked" if self.clicked else "not clicked"}.'
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
     @classmethod
     def invalid_pointer(cls):
         return cls(-99, -99, False)
