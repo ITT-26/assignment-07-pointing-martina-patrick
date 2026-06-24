@@ -1,0 +1,8 @@
+Logs/results file format
+
+File name: {task}_{part_id}_{input_method}_{delay}ms_{num_targets}_{radius_or_width}_{distance}.csv
+
+Contents:
+iteration, part_id, input_method, delay, num_targets, radius, distance, target_id, timestamp
+1,P001,mouse,0,10,50,200,0,1781797104801
+1,P001,mouse,0,10,50,200,1,1781797105896
