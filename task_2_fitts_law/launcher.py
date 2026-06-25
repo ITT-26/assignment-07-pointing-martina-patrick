@@ -55,10 +55,10 @@ def main() -> None:
 
         fitts_config = {
             "participant_id": args.participant_id,
-            "input_method": args.input_method,
-            "delay": args.delay,
             "conditions": [
                 {
+                    "input_method": args.input_method,
+                    "delay": args.delay,
                     "num_targets": args.num_targets,
                     "radius": args.radius,
                     "distance": args.distance,
@@ -90,36 +90,36 @@ def load_config(config_path: str) -> dict:
 # validates parsed arguments
 def validate_config(config: dict) -> None:
 
-    required_top_level = ["participant_id", "input_method", "delay", "conditions"]
+    required_top_level = ["participant_id", "conditions"]
 
     # check all required fields exist
     missing = [field for field in required_top_level if field not in config]
     if missing:
         raise ValueError(f"Config missing required fields: {missing}")
 
-    # validate input_method
-    valid_methods = ["pose", "mouse", "touchpad"]
-    if config["input_method"] not in valid_methods:
-        raise ValueError(
-            f"input_method must be one of {valid_methods}, got: {config['input_method']}"
-        )
-
-    # validate delay
-    if config["delay"] < 0:
-        raise ValueError(f"delay cannot be negative")
-
     # validate conditions list
     if not config["conditions"] or not isinstance(config["conditions"], list):
         raise ValueError("conditions must be a non-empty list")
 
     for i, condition in enumerate(config["conditions"]):
-        required_condition_fields = ["num_targets", "radius", "distance", "repetitions"]
+        required_condition_fields = ["num_targets", "radius", "distance", "repetitions", "input_method", "delay"]
 
         missing_condition = [
             field for field in required_condition_fields if field not in condition
         ]
         if missing_condition:
             raise ValueError(f"Condition {i} missing fields: {missing_condition}")
+        
+        # validate input_method
+        valid_methods = ["pose", "mouse", "touchpad"]
+        if condition["input_method"] not in valid_methods:
+            raise ValueError(
+                f"Condition {i}: input_method must be one of {valid_methods}, got: {condition['input_method']}"
+            )
+
+        # validate delay
+        if condition["delay"] < 0:
+            raise ValueError(f"Condition {i}: delay cannot be negative")
 
         # validate numeric fields in each condition
         if condition["num_targets"] < 2 or condition["num_targets"] > 10:

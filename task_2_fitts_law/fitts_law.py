@@ -17,6 +17,11 @@ POINTER_COLOR = (200, 50, 50)  # red
 BODY_TEXT_COLOR = (255, 255, 255)  # white
 COMMANDS_TEXT_COLOR = (0, 255, 0)  # green
 BG_COLOR = (40, 40, 40)  # dark gray
+TITLE_FONT_SIZE = 36
+LARGE_FONT_SIZE = 30
+SUBTITLE_FONT_SIZE = 26
+INFO_FONT_SIZE = 22
+SMALL_FONT_SIZE = 20
 
 
 class FittsLawApp:
@@ -24,8 +29,6 @@ class FittsLawApp:
 
         # extract info from config file
         self.participant_id = config["participant_id"]
-        self.input_method = config["input_method"]
-        self.delay = config["delay"]
         self.conditions = config["conditions"]
 
         # log file
@@ -49,6 +52,8 @@ class FittsLawApp:
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
 
         # condition-specific parameters
+        self.input_method = None
+        self.delay = None
         self.num_targets = None
         self.radius = None
         self.distance = None
@@ -72,6 +77,8 @@ class FittsLawApp:
             self.sequence.append((start + i + num_targets // 2) % num_targets)
 
     def setup_condition(self):
+        self.input_method = self.conditions[self.current_condition_index]["input_method"]
+        self.delay = self.conditions[self.current_condition_index]["delay"]
         self.num_targets = self.conditions[self.current_condition_index]["num_targets"]
         self.radius = self.conditions[self.current_condition_index]["radius"]
         self.distance = self.conditions[self.current_condition_index]["distance"]
@@ -131,6 +138,7 @@ class FittsLawApp:
                     self.current_condition_index += 1
                     # reset repetition tracker
                     self.current_repetition = 0
+                    self.current_target_index = 0
                     # setup new condition and logging
                     self.setup_condition()
                     # close current file
@@ -184,6 +192,7 @@ class FittsLawApp:
                 self.game_state = "condition_complete"
             elif self.game_state in ("repetition_complete", "condition_complete"):
                 if self.game_state == "condition_complete":
+                    self.setup_condition()
                     self.setup_logging()
                 self.random_start()
                 self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
@@ -192,15 +201,17 @@ class FittsLawApp:
 
     def draw_init_screen(self):
         # title
-        pyglet.text.Label(
+        title = pyglet.text.Label(
             "Fitts' Law Test",
             x=WINDOW_WIDTH // 2,
             y=WINDOW_HEIGHT // 2 + 200,
             anchor_x="center",
             anchor_y="center",
-            font_size=36,
-            color=(*BODY_TEXT_COLOR, 255),
-        ).draw()
+            font_size=TITLE_FONT_SIZE,
+            color=(*BODY_TEXT_COLOR, 255)
+        )
+        title.bold = True
+        title.draw()
 
         # instructions
         pyglet.text.Label(
@@ -209,7 +220,7 @@ class FittsLawApp:
             y=WINDOW_HEIGHT // 2 + 50,
             anchor_x="center",
             anchor_y="center",
-            font_size=26,
+            font_size=SUBTITLE_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
             multiline=True,
             width=600,
@@ -223,7 +234,7 @@ class FittsLawApp:
             y=300,
             anchor_x="center",
             anchor_y="center",
-            font_size=22,
+            font_size=INFO_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
@@ -234,70 +245,95 @@ class FittsLawApp:
             y=100,
             anchor_x="center",
             anchor_y="center",
-            font_size=22,
+            font_size=INFO_FONT_SIZE,
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
     def draw_rep_complete_screen(self):
         pyglet.text.Label(
-            "Repetition complete!",
+            f"Repetition {self.current_repetition} of {self.repetitions} complete!",
             x=WINDOW_WIDTH // 2,
             y=WINDOW_HEIGHT // 2 + 50,
             anchor_x="center",
             anchor_y="center",
-            font_size=28,
+            font_size=LARGE_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
+
         pyglet.text.Label(
-            f"Repetition {self.current_repetition} of {self.repetitions}",
-            x=WINDOW_WIDTH // 2,
-            y=WINDOW_HEIGHT // 2,
-            anchor_x="center",
-            anchor_y="center",
-            font_size=20,
-            color=(*BODY_TEXT_COLOR, 255),
-        ).draw()
-        pyglet.text.Label(
-            "[SPACE]: continue | 'q' / [ESC]: quit",
+            "Press [SPACE] to continue",
             x=WINDOW_WIDTH // 2,
             y=100,
             anchor_x="center",
             anchor_y="center",
-            font_size=22,
+            font_size=INFO_FONT_SIZE,
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
     def draw_condition_screen(self):
+        # title
         pyglet.text.Label(
-            "Next condition:",
+            f"Condition {self.current_condition_index + 1} of {len(self.conditions)}:",
             x=WINDOW_WIDTH // 2,
-            y=WINDOW_HEIGHT // 2 + 200,
+            y=WINDOW_HEIGHT // 2 + 250,
             anchor_x="center",
             anchor_y="center",
-            font_size=28,
+            font_size=LARGE_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
+
+        # input method (large and highlighted since it's important for the user if the condition changes)
         pyglet.text.Label(
-            f"Condition {self.current_condition_index + 1} of {len(self.conditions)}\n"
-            f"Targets: {self.num_targets}  |  Radius: {self.radius}  |  Distance: {self.distance}\n"
-            f"Repetitions: {self.repetitions}",
+            f"Input: {self.input_method}",
             x=WINDOW_WIDTH // 2,
-            y=WINDOW_HEIGHT // 2 + 50,
+            y=WINDOW_HEIGHT // 2 + 150,
             anchor_x="center",
             anchor_y="center",
-            font_size=20,
-            color=(*BODY_TEXT_COLOR, 255),
-            multiline=True,
-            width=600,
-            align="center",
+            font_size=SUBTITLE_FONT_SIZE - 2, 
+            color=TARGET_COLOR,
         ).draw()
+
+        # delay
         pyglet.text.Label(
-            "[SPACE]: start | 'q' / [ESC]: quit",
+            f"Delay: {self.delay} ms",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 80,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=INFO_FONT_SIZE,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+
+        # task parameters
+        pyglet.text.Label(
+            f"Targets: {self.num_targets}  |  Radius: {self.radius}  |  Distance: {self.distance}",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 + 20,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=INFO_FONT_SIZE,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+
+        # repetitions (separate emphasis also)
+        pyglet.text.Label(
+            f"You will need to repeat this task {self.repetitions} times.",
+            x=WINDOW_WIDTH // 2,
+            y=WINDOW_HEIGHT // 2 - 100,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=INFO_FONT_SIZE,
+            color=BODY_TEXT_COLOR, 
+        ).draw()
+
+        # instructions
+        pyglet.text.Label(
+            "Press [SPACE] to start",
             x=WINDOW_WIDTH // 2,
             y=100,
             anchor_x="center",
             anchor_y="center",
-            font_size=22,
+            font_size=INFO_FONT_SIZE,
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
@@ -308,16 +344,16 @@ class FittsLawApp:
             y=WINDOW_HEIGHT // 2 + 100,
             anchor_x="center",
             anchor_y="center",
-            font_size=32,
+            font_size=LARGE_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
         pyglet.text.Label(
             "Thank you for participating.",
             x=WINDOW_WIDTH // 2,
-            y=WINDOW_HEIGHT // 2 + 30,
+            y=WINDOW_HEIGHT // 2 + 20,
             anchor_x="center",
             anchor_y="center",
-            font_size=20,
+            font_size=INFO_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
         pyglet.text.Label(
@@ -326,27 +362,41 @@ class FittsLawApp:
             y=100,
             anchor_x="center",
             anchor_y="center",
-            font_size=22,
+            font_size=INFO_FONT_SIZE,
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
     def draw_hud(self):
+        # repetition
         pyglet.text.Label(
-            f"Rep {self.current_repetition + 1}/{self.repetitions}",
-            x=10,
-            y=WINDOW_HEIGHT - 30,
-            anchor_x="left",
-            anchor_y="center",
-            font_size=16,
-            color=(*BODY_TEXT_COLOR, 255),
-        ).draw()
-        pyglet.text.Label(
-            f"Condition {self.current_condition_index + 1}/{len(self.conditions)}",
+            f"Rep: {self.current_repetition + 1}/{self.repetitions}",
             x=WINDOW_WIDTH - 10,
             y=WINDOW_HEIGHT - 30,
             anchor_x="right",
             anchor_y="center",
-            font_size=20,
+            font_size=SMALL_FONT_SIZE,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        
+        # condition
+        pyglet.text.Label(
+            f"Condition: {self.current_condition_index + 1}/{len(self.conditions)}",
+            x=10,
+            y=WINDOW_HEIGHT - 30,
+            anchor_x="left",
+            anchor_y="center",
+            font_size=SMALL_FONT_SIZE,
+            color=(*BODY_TEXT_COLOR, 255),
+        ).draw()
+        
+        # input method 
+        pyglet.text.Label(
+            f"Input method: {self.input_method}",
+            x=WINDOW_WIDTH // 2,
+            y=30,
+            anchor_x="center",
+            anchor_y="center",
+            font_size=SMALL_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
@@ -375,5 +425,4 @@ class FittsLawApp:
 
 # - handle pose input (with Patrick's work)
 # - correct paths, folders for results and config
-# - test sample config file for continuous run (although this is for Task 5 mainly)
 # - if number of targets is low, maybe dont stop the rep after all have been clicked, instead make some extra cycles

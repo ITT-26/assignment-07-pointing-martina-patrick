@@ -1,0 +1,21 @@
+{
+  "participant_id": "test",
+  "conditions": [
+    {
+      "input_method": "mouse",
+      "delay": 0,
+      "num_targets": 6,
+      "width": 40,
+      "distance": 300,
+      "repetitions": 2
+    },
+    {
+      "input_method": "touchpad",
+      "delay": 150,
+      "num_targets": 8,
+      "width": 30,
+      "distance": 450,
+      "repetitions": 1
+    }
+  ]
+}
