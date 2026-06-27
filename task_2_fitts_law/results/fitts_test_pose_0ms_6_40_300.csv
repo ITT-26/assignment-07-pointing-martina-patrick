@@ -1,0 +1,8 @@
+iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,hit,timestamp
+0,test,pose,0,6,40,300,4,1,5620
+0,test,pose,0,6,40,300,1,1,6916
+0,test,pose,0,6,40,300,5,0,7716
+0,test,pose,0,6,40,300,5,1,9381
+0,test,pose,0,6,40,300,2,1,10613
+0,test,pose,0,6,40,300,0,1,13541
+0,test,pose,0,6,40,300,3,1,16101

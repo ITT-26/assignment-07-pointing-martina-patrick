@@ -5,6 +5,17 @@ import time
 import math
 import random
 import pathlib
+import cv2
+import ctypes
+import sys
+import os
+from mediapipe.tasks.python import vision
+from pynput.mouse import Controller
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from hand_detector.hand_detector import HandDetector
+from hand_detector.pointer import Pointer
 
 # window setup parameters
 WINDOW_WIDTH = 800
@@ -17,6 +28,7 @@ POINTER_COLOR = (200, 50, 50)  # red
 BODY_TEXT_COLOR = (255, 255, 255)  # white
 COMMANDS_TEXT_COLOR = (0, 255, 0)  # green
 BG_COLOR = (40, 40, 40)  # dark gray
+
 TITLE_FONT_SIZE = 36
 LARGE_FONT_SIZE = 30
 SUBTITLE_FONT_SIZE = 26
@@ -34,22 +46,19 @@ class FittsLawApp:
         # log file
         self.log_file = None
 
-        # init window
-        self.window = pyglet.window.Window(
-            width=WINDOW_WIDTH, height=WINDOW_HEIGHT, caption="Fitts' Law"
-        )
-        # bg color
-        pyglet.gl.glClearColor(*[c / 255.0 for c in BG_COLOR], 1.0)
-        # callbacks
-        self.window.on_draw = self.on_draw
-        self.window.on_mouse_press = self.on_mouse_press
-        self.window.on_key_press = self.on_key_press
-
-        # init state
+        # state trackers
         self.current_condition_index = 0
         self.current_repetition = 0
         self.current_target_index = 0
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
+        self.trial_start_time = (
+            None  # track time for timestamps - it starts once the user clicks
+        )
+        self.is_clicked = False
+
+        self.last_pose_x = WINDOW_WIDTH // 2
+        self.last_pose_y = WINDOW_HEIGHT // 2
+        self.pose_mouse = Controller()
 
         # condition-specific parameters
         self.input_method = None
@@ -59,11 +68,31 @@ class FittsLawApp:
         self.distance = None
         self.repetitions = None
 
+        # screen and window setup
+        self.window = pyglet.window.Window(
+            width=WINDOW_WIDTH, height=WINDOW_HEIGHT, caption="Fitts' Law"
+        )
+
+        user32 = ctypes.windll.user32
+        self.screen_width = user32.GetSystemMetrics(0)
+        self.screen_height = user32.GetSystemMetrics(1)
+
+        # bg color
+        pyglet.gl.glClearColor(*[c / 255.0 for c in BG_COLOR], 1.0)
+
+        # callbacks
+        self.window.on_draw = self.on_draw
+        self.window.on_mouse_press = self.on_mouse_press
+        self.window.on_key_press = self.on_key_press
+
+        # pose detection setup
+        self.hand_detector = None
+        self.webcam = None
+        self.show_camera_feed = True  # True for debugging, False for app, LABEL_DEBUG
+        self.cam_deadzone = 0.1
+
         # first (or only) condition setup
         self.setup_condition()  # here the current condition's condition-specific parameters are updated
-
-        # track time for timestamps
-        self.trial_start_time = None  # it starts once the user clicks
 
         # pyglet update loop scheduling
         pyglet.clock.schedule_interval(self.update, 1 / 60.0)
@@ -77,12 +106,24 @@ class FittsLawApp:
             self.sequence.append((start + i + num_targets // 2) % num_targets)
 
     def setup_condition(self):
-        self.input_method = self.conditions[self.current_condition_index]["input_method"]
+        self.input_method = self.conditions[self.current_condition_index][
+            "input_method"
+        ]
         self.delay = self.conditions[self.current_condition_index]["delay"]
         self.num_targets = self.conditions[self.current_condition_index]["num_targets"]
         self.radius = self.conditions[self.current_condition_index]["radius"]
         self.distance = self.conditions[self.current_condition_index]["distance"]
         self.repetitions = self.conditions[self.current_condition_index]["repetitions"]
+
+        # camera initialization for pose input method
+        if self.input_method == "pose" and self.webcam is None:
+            self.webcam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            self.hand_detector = HandDetector(vision.RunningMode.VIDEO)
+            if self.show_camera_feed:
+                cv2.namedWindow("Pose Debug")
+        elif self.input_method != "pose" and self.webcam is not None:
+            # release camera assets if moving to a non-pose condition
+            self.cleanup_camera()
 
         # get center of the window
         center_x = WINDOW_WIDTH / 2
@@ -99,23 +140,22 @@ class FittsLawApp:
     def setup_logging(self):
         pathlib.Path("results").mkdir(exist_ok=True)
         filename = (
-            f"results/fitts_{self.participant_id}_{self.input_method}_"
+            f"task_2_fitts_law/results/fitts_{self.participant_id}_{self.input_method}_"
             f"{self.delay}ms_{self.num_targets}_"
             f"{self.radius}_{self.distance}.csv"
         )
         self.log_file = open(filename, "w")
         self.log_file.write(
-            "iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,timestamp\n"
+            "iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,hit,timestamp\n"
         )
         self.log_file.flush()
 
-    def log(self, target_id):
-        condition = self.conditions[self.current_condition_index]
+    def log_click(self, target_id, hit):
         timestamp = int((time.time() - self.trial_start_time) * 1000)
         self.log_file.write(
             f"{self.current_repetition},{self.participant_id},{self.input_method},{self.delay},"
             f"{self.num_targets},{self.radius},{self.distance},"
-            f"{target_id},{timestamp}\n"
+            f"{target_id},{1 if hit else 0},{timestamp}\n"
         )
         self.log_file.flush()
 
@@ -157,21 +197,26 @@ class FittsLawApp:
             ].color = CURRENT_TARGET_COLOR
 
     def handle_click(self, x, y):
-        # we only care about the target at the current index
-        # we want to check whether x, y are inside target_x +- radius, target_y +- radius
         current_target = self.targets[self.sequence[self.current_target_index]]
         distance = math.sqrt(
             (x - current_target["x"]) ** 2 + (y - current_target["y"]) ** 2
         )
+
+        target_id = current_target["index"]
+
         if distance <= self.radius:
-            # log
-            target_id = current_target["index"]
-            self.log(target_id)
+            print("HIT!")  # LABEL_DEBUG
+            # Log hit
+            self.log_click(target_id, hit=True)
             old_target = self.targets[self.sequence[self.current_target_index]]
             # handle transition to next target/end of repetition or condition
             self.handle_transition()
             # update screen
             self.update_visuals(old_target)
+        else:
+            print("MISS")  # LABEL_DEBUG
+            # log miss
+            self.log_click(target_id, hit=False)
 
     def on_mouse_press(self, x, y, button, modifiers):
         if self.game_state == "trial_running":
@@ -179,13 +224,9 @@ class FittsLawApp:
                 if button == pyglet.window.mouse.LEFT:
                     self.handle_click(x, y)
 
-            # elif self.input_method == "pose":
-            #     pass
-            #     # si la funcion de Patrick devuelve True para el click
-            #     # self.handle_click(x,y)
-
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.Q or symbol == pyglet.window.key.ESCAPE:
+            self.cleanup()
             pyglet.app.exit()
         elif symbol == pyglet.window.key.SPACE:
             if self.game_state == "init_screen":
@@ -199,6 +240,58 @@ class FittsLawApp:
                 self.game_state = "trial_running"
                 self.trial_start_time = time.time()
 
+    def update(self, dt):
+        # track cursor position for mouse/touchpad
+        if self.game_state == "trial_running" and (
+            self.input_method == "mouse" or self.input_method == "touchpad"
+        ):
+            self.last_pose_x = self.window._mouse_x
+            self.last_pose_y = self.window._mouse_y
+
+        if self.input_method == "pose" and self.game_state == "trial_running":
+            frame_ok, frame = self.webcam.read()
+            if not frame_ok:
+                return
+
+            # parse the camera frame
+            pointer, annotated_image = self.hand_detector.get_pointer_state(frame)
+
+            if self.show_camera_feed:
+                cv2.imshow("Pose Debug", annotated_image)
+
+            # invalid pointer check
+            if pointer == Pointer.invalid_pointer():
+                return
+
+            # deadzone logic from pointing_input.py
+            def apply_deadzone(val, deadzone):
+                val = max(deadzone, min(1 - deadzone, val))
+                return (val - deadzone) / (1 - 2 * deadzone)
+
+            norm_x = apply_deadzone(pointer.x, self.cam_deadzone)
+            norm_y = apply_deadzone(pointer.y, self.cam_deadzone)
+
+            # map to absolute OS screen space
+            cursor_x = norm_x * self.screen_width
+            cursor_y = norm_y * self.screen_height
+
+            # initialize pynput mouse controller to move the desktop pointer
+            if not hasattr(self, "pose_mouse"):
+                self.pose_mouse = Controller()
+
+            self.pose_mouse.position = (cursor_x, cursor_y)
+
+            # lock the red dot to the cursor position relative to the game window
+            self.last_pose_x = self.window._mouse_x
+            self.last_pose_y = self.window._mouse_y
+
+            # use pointer.clicked property to check for clicks
+            if pointer.clicked and not getattr(self, "is_clicked", False):
+                self.handle_click(self.last_pose_x, self.last_pose_y)
+                self.is_clicked = True
+            elif not pointer.clicked:
+                self.is_clicked = False
+
     def draw_init_screen(self):
         # title
         title = pyglet.text.Label(
@@ -208,7 +301,7 @@ class FittsLawApp:
             anchor_x="center",
             anchor_y="center",
             font_size=TITLE_FONT_SIZE,
-            color=(*BODY_TEXT_COLOR, 255)
+            color=(*BODY_TEXT_COLOR, 255),
         )
         title.bold = True
         title.draw()
@@ -289,7 +382,7 @@ class FittsLawApp:
             y=WINDOW_HEIGHT // 2 + 150,
             anchor_x="center",
             anchor_y="center",
-            font_size=SUBTITLE_FONT_SIZE - 2, 
+            font_size=SUBTITLE_FONT_SIZE - 2,
             color=TARGET_COLOR,
         ).draw()
 
@@ -323,7 +416,7 @@ class FittsLawApp:
             anchor_x="center",
             anchor_y="center",
             font_size=INFO_FONT_SIZE,
-            color=BODY_TEXT_COLOR, 
+            color=BODY_TEXT_COLOR,
         ).draw()
 
         # instructions
@@ -377,7 +470,7 @@ class FittsLawApp:
             font_size=SMALL_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
-        
+
         # condition
         pyglet.text.Label(
             f"Condition: {self.current_condition_index + 1}/{len(self.conditions)}",
@@ -388,8 +481,8 @@ class FittsLawApp:
             font_size=SMALL_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
-        
-        # input method 
+
+        # input method
         pyglet.text.Label(
             f"Input method: {self.input_method}",
             x=WINDOW_WIDTH // 2,
@@ -405,6 +498,13 @@ class FittsLawApp:
         if self.game_state == "trial_running":
             for target in self.targets:
                 target["circle"].draw()
+
+            if hasattr(self, "last_pose_x"):
+                pointer_dot = pyglet.shapes.Circle(
+                    self.last_pose_x, self.last_pose_y, 10, color=(255, 0, 0)
+                )
+                pointer_dot.draw()
+
             self.draw_hud()
         elif self.game_state == "init_screen":
             self.draw_init_screen()
@@ -415,14 +515,22 @@ class FittsLawApp:
         elif self.game_state == "experiment_done":
             self.draw_exp_done_screen()
 
-    def update(self, dt):
-        pass
+    def cleanup_camera(self):
+        if self.webcam:
+            self.webcam.release()
+            self.webcam = None
+        if self.show_camera_feed:
+            try:
+                cv2.destroyWindow("Pose Debug")
+            except cv2.error:
+                pass
+
+    def cleanup(self):
+        self.cleanup_camera()
+        if self.log_file:
+            self.log_file.close()
 
 
 # TODO:
-
-# CHANGE LOG AND CONFIG (PATRICK'S SUGGESTION DS)
-
-# - handle pose input (with Patrick's work)
-# - correct paths, folders for results and config
-# - if number of targets is low, maybe dont stop the rep after all have been clicked, instead make some extra cycles
+# - change log structure ?
+# - find a good combination of parameters for the three different conditions to test out

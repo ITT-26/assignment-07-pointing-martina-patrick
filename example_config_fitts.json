@@ -2,7 +2,7 @@
   "participant_id": "test",
   "conditions": [
     {
-      "input_method": "mouse",
+      "input_method": "pose",
       "delay": 0,
       "num_targets": 6,
       "radius": 40,
@@ -11,15 +11,15 @@
     },
     {
       "input_method": "touchpad",
-      "delay": 150,
+      "delay": 0,
       "num_targets": 8,
       "radius": 30,
       "distance": 450,
       "repetitions": 1
     },
     {
-      "input_method": "pose",
-      "delay": 150,
+      "input_method": "mouse",
+      "delay": 0,
       "num_targets": 8,
       "radius": 30,
       "distance": 450,

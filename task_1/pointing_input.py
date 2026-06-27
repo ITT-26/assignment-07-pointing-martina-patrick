@@ -13,7 +13,8 @@ from hand_detector.pointer import Pointer
 
 class PointingInput:
     def __init__(self,  camera_deadzone, video_id = 0, camera=False):
-        self.cap = cv2.VideoCapture(video_id)
+        #self.cap = cv2.VideoCapture(video_id)
+        self.cap = cv2.VideoCapture(video_id, cv2.CAP_DSHOW)    
         self.displays_img = camera
         if self.displays_img:
             cv2.namedWindow('frame')
