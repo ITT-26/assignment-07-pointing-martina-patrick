@@ -1,6 +1,6 @@
 Logs/results file format
 
-File name: {task}_{part_id}_{input_method}_{delay}ms_{num_targets}_{radius_or_width}_{distance}.csv
+File name: {task}_{part_id}_{input_method}_{delay}ms_{num_targets}_{radius}_{distance}.csv
 
 Contents:
 iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,hit,timestamp

@@ -47,9 +47,7 @@ class FittsLawApp:
         self.current_repetition = 0
         self.current_target_index = 0
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
-        self.trial_start_time = (
-            None  # track time for timestamps - it starts once the user clicks
-        )
+        #self.trial_start_time = None  # track time for timestamps - it starts once the user clicks
         self.is_clicked = False
 
         self.last_pose_x = WINDOW_WIDTH // 2
@@ -147,7 +145,8 @@ class FittsLawApp:
         self.log_file.flush()
 
     def log_click(self, target_id, hit):
-        timestamp = int((time.time() - self.trial_start_time) * 1000)
+        # timestamp = int((time.time() - self.trial_start_time) * 1000)
+        timestamp = int(time.time() * 1000)  # Unix ms abs
         self.log_file.write(
             f"{self.current_repetition},{self.participant_id},{self.input_method},{self.delay},"
             f"{self.num_targets},{self.radius},{self.distance},"
@@ -234,7 +233,7 @@ class FittsLawApp:
                 self.random_start()
                 self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
                 self.game_state = "trial_running"
-                self.trial_start_time = time.time()
+                #self.trial_start_time = time.time()
 
     def update(self, dt):
         # track cursor position for mouse/touchpad

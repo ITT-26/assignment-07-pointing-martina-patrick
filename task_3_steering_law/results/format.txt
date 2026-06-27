@@ -1,0 +1,7 @@
+Logs/results file format
+
+File name: {task}_{part_id}_{input_method}_{delay}ms_{width}_{distance}.csv
+
+Contents:
+iteration,part_id,input_method,delay,width,distance,hits,completion_time
+1,P001,mouse,0,50,200,5,19
