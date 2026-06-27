@@ -7,12 +7,8 @@ import random
 import pathlib
 import cv2
 import ctypes
-import sys
-import os
 from mediapipe.tasks.python import vision
 from pynput.mouse import Controller
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from hand_detector.hand_detector import HandDetector
 from hand_detector.pointer import Pointer
