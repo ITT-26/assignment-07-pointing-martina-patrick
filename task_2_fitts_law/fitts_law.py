@@ -47,7 +47,6 @@ class FittsLawApp:
         self.current_repetition = 0
         self.current_target_index = 0
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
-        #self.trial_start_time = None  # track time for timestamps - it starts once the user clicks
         self.is_clicked = False
 
         self.last_pose_x = WINDOW_WIDTH // 2
@@ -145,7 +144,6 @@ class FittsLawApp:
         self.log_file.flush()
 
     def log_click(self, target_id, hit):
-        # timestamp = int((time.time() - self.trial_start_time) * 1000)
         timestamp = int(time.time() * 1000)  # Unix ms abs
         self.log_file.write(
             f"{self.current_repetition},{self.participant_id},{self.input_method},{self.delay},"
@@ -233,7 +231,11 @@ class FittsLawApp:
                 self.random_start()
                 self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
                 self.game_state = "trial_running"
-                #self.trial_start_time = time.time()
+
+    # deadzone logic from pointing_input.py
+    def apply_deadzone(self, val, deadzone):
+        val = max(deadzone, min(1 - deadzone, val))
+        return (val - deadzone) / (1 - 2 * deadzone)
 
     def update(self, dt):
         # track cursor position for mouse/touchpad
@@ -258,13 +260,8 @@ class FittsLawApp:
             if pointer == Pointer.invalid_pointer():
                 return
 
-            # deadzone logic from pointing_input.py
-            def apply_deadzone(val, deadzone):
-                val = max(deadzone, min(1 - deadzone, val))
-                return (val - deadzone) / (1 - 2 * deadzone)
-
-            norm_x = apply_deadzone(pointer.x, self.cam_deadzone)
-            norm_y = apply_deadzone(pointer.y, self.cam_deadzone)
+            norm_x = self.apply_deadzone(pointer.x, self.cam_deadzone)
+            norm_y = self.apply_deadzone(pointer.y, self.cam_deadzone)
 
             # map to absolute OS screen space
             cursor_x = norm_x * self.screen_width

@@ -24,10 +24,8 @@ def main() -> None:
     parser.add_argument("-l", "--delay", type=int, help="Latency in ms")  # latency
     parser.add_argument(
         "-d", "--distance", type=int, help="Tunnel distance"
-    )  # tunnel distance 
-    parser.add_argument(
-        "-w", "--width", type=int, help="Tunnel width"
-    )  # tunnel width
+    )  # tunnel distance
+    parser.add_argument("-w", "--width", type=int, help="Tunnel width")  # tunnel width
 
     args = parser.parse_args()
 
@@ -55,7 +53,7 @@ def main() -> None:
                 {
                     "input_method": args.input_method,
                     "delay": args.delay,
-                    "radius": args.width,
+                    "width": args.width,
                     "distance": args.distance,
                     "repetitions": args.repetitions,
                 }
@@ -97,14 +95,20 @@ def validate_config(config: dict) -> None:
         raise ValueError("conditions must be a non-empty list")
 
     for i, condition in enumerate(config["conditions"]):
-        required_condition_fields = ["width", "distance", "repetitions", "input_method", "delay"]
+        required_condition_fields = [
+            "width",
+            "distance",
+            "repetitions",
+            "input_method",
+            "delay",
+        ]
 
         missing_condition = [
             field for field in required_condition_fields if field not in condition
         ]
         if missing_condition:
             raise ValueError(f"Condition {i} missing fields: {missing_condition}")
-        
+
         # validate input_method
         valid_methods = ["pose", "mouse", "touchpad"]
         if condition["input_method"] not in valid_methods:
@@ -138,7 +142,12 @@ def validate_config(config: dict) -> None:
                 f"Distance ({condition['distance']}) must be <= {WINDOW_WIDTH} - 60"
             )
         # width (space between rectangles), takes into account some padding and also the drawn rectangles' width
-        #if condition["width"] >
+        # TODO: change when rectangles are drawn
+        if condition["width"] > WINDOW_HEIGHT - 100:
+            raise ValueError(
+                f"Condition {i}: tunnel doesn't fit on screen. "
+                f"Width ({condition['width']}) must be <= {WINDOW_HEIGHT} - 100"
+            )
 
 
 if __name__ == "__main__":

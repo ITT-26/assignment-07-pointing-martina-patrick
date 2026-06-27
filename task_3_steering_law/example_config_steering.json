@@ -4,17 +4,22 @@
     {
       "input_method": "mouse",
       "delay": 0,
-      "num_targets": 6,
-      "width": 40,
-      "distance": 300,
-      "repetitions": 2
+      "width": 30,
+      "distance": 500,
+      "repetitions": 1
     },
     {
       "input_method": "touchpad",
-      "delay": 150,
-      "num_targets": 8,
-      "width": 30,
-      "distance": 450,
+      "delay": 0,
+      "width": 40,
+      "distance": 300,
+      "repetitions": 1
+    },
+    {
+      "input_method": "pose",
+      "delay": 0,
+      "width": 80,
+      "distance": 250,
       "repetitions": 1
     }
   ]
