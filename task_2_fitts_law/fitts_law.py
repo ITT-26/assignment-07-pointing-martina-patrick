@@ -14,7 +14,7 @@ from hand_detector.hand_detector import HandDetector
 from hand_detector.pointer import Pointer
 
 # window setup parameters
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 800
 
 # design constants

@@ -2,28 +2,28 @@
   "participant_id": "test",
   "conditions": [
     {
-      "input_method": "pose",
+      "input_method": "mouse",
       "delay": 0,
       "num_targets": 6,
-      "radius": 40,
+      "radius": 50,
       "distance": 300,
-      "repetitions": 1
+      "repetitions": 2
     },
     {
       "input_method": "touchpad",
       "delay": 0,
       "num_targets": 8,
-      "radius": 30,
-      "distance": 450,
-      "repetitions": 1
+      "radius": 40,
+      "distance": 400,
+      "repetitions": 2
     },
     {
-      "input_method": "mouse",
+      "input_method": "pose",
       "delay": 0,
-      "num_targets": 8,
+      "num_targets": 10,
       "radius": 30,
       "distance": 450,
-      "repetitions": 1
+      "repetitions": 2
     }
   ]
 }
