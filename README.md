@@ -35,7 +35,41 @@ other sources we decided to include the results directly in the repo.
 
 ## Method
 
-Here will be some lines about the study procedure. why this order of conditions etc
+The method can be split into two parts: The theory and what should be done in an ideal 
+scenario and then what we actually did in our specific scenario.
+
+### Theory
+
+Optimally, the number of participants would be determined by the experiment setup. 
+In our case we have 4 input techniques as conditions, on top of that we have 3 radii and
+3 distances for Fitt's Law as well as 3 lengths and 3 widths for steering law. To 
+counterbalance this we can use a latin square approach. Using all possible combinations
+to do so would result in 4 x 3 x 3 = 36 conditions and would therefore need 36 participants
+if we were to counterbalance this with a latin square. 
+
+Another approach is focusing on input device and doing a 4 condition latin square or a
+full counterbalancing which would still result in more than 3 participants.
+
+After each input device we would probably design a questionnaire or use an already
+existing one to determine how users felt about the device.
+
+### Reality
+
+The reason why counterbalancing is done is to prevent biases like the learning effect or
+participants getting tired over time. With only 3 participants this is simply not feasible
+which is why we decided on keeping the order of input devices and other conditions the 
+same for each participant. This way we can at least say that all participants had the same
+conditions and the learning effect, tiredness etc. should be the same for each participant. 
+This does still not factor in that people learn at different rates or that some might get
+tired faster than others but still sounded like the best approach given this specific 
+scenario.
+
+We can use a quesstionnaire, but it will only contain some questions that we consider 
+important. We will ask users to rate the following statements on likert scales from 
+1 (Strongly disagree) to 7 (strongly agree):
+- Using this input method was pleasant
+- This input method feels natural and intuitive to use
+- I had no problems using this input method
 
 ## Procedure
 
@@ -53,7 +87,10 @@ Interpretation of results goes here
 
 ### Issues with the Method
 
-Balancing is basically non existent lmao
+Since we only had a run with 3 participants it was basically impossible to counterbalance
+this study. Apart from that a study with 3 participants (of which 2 designed the study and
+therefore has knowledge beforehand) has little value. If at all it would be used to check
+for an initial effect or to test the setup like a pilot study.
 
 ### Issues with implementation
 
