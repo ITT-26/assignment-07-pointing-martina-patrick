@@ -29,6 +29,10 @@ If no hand is detected the cursor will be controlled by the mouse as is usual
 
 # Task 5
 
+DISCLAIMER: Usually data/results would not be uploaded via git directly to avoid clutter.
+Since we will only have data for 3 participants and the results will not be shared via
+other sources we decided to include the results directly in the repo.
+
 ## Method
 
 Here will be some lines about the study procedure. why this order of conditions etc
