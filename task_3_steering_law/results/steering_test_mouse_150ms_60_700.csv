@@ -1,2 +1,2 @@
 iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
-1,test,pose,0,120,600,0,1782647665827,1782647668019
+1,test,mouse,150,60,700,0,1782647651933,1782647653742

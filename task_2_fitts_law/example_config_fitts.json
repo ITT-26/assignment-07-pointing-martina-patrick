@@ -4,10 +4,18 @@
     {
       "input_method": "mouse",
       "delay": 0,
-      "num_targets": 6,
-      "radius": 50,
-      "distance": 300,
-      "repetitions": 2
+      "num_targets": 10,
+      "radius": 30,
+      "distance": 450,
+      "repetitions": 1
+    },
+    {
+      "input_method": "mouse",
+      "delay": 150,
+      "num_targets": 10,
+      "radius": 30,
+      "distance": 450,
+      "repetitions": 1
     },
     {
       "input_method": "touchpad",
@@ -15,15 +23,15 @@
       "num_targets": 8,
       "radius": 40,
       "distance": 400,
-      "repetitions": 2
+      "repetitions": 1
     },
     {
       "input_method": "pose",
       "delay": 0,
-      "num_targets": 10,
-      "radius": 30,
-      "distance": 450,
-      "repetitions": 2
+      "num_targets": 6,
+      "radius": 50,
+      "distance": 300,
+      "repetitions": 1
     }
   ]
 }

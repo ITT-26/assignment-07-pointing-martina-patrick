@@ -9,6 +9,13 @@
       "repetitions": 1
     },
     {
+      "input_method": "mouse",
+      "delay": 150,
+      "width": 60,
+      "distance": 700,
+      "repetitions": 1
+    },
+    {
       "input_method": "touchpad",
       "delay": 0,
       "width": 100,

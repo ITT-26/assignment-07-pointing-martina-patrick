@@ -7,6 +7,7 @@ import cv2
 import ctypes
 from mediapipe.tasks.python import vision
 from pynput.mouse import Controller
+from collections import deque
 
 from hand_detector.hand_detector import HandDetector
 from hand_detector.pointer import Pointer
@@ -32,6 +33,9 @@ SMALL_FONT_SIZE = 20
 WALL_THICKNESS = 20
 START_ZONE_WIDTH = 20
 
+# other
+DEQUE_LEN = 240
+
 
 class SteeringLawApp:
     def __init__(self, config: dict):
@@ -50,6 +54,7 @@ class SteeringLawApp:
         self.trial_start_time = None
         self.pointer_inside = False
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
+        self.pointer_buffer = deque(maxlen=DEQUE_LEN)  # [timestamp_ms, x, y]
 
         self.last_pose_x = WINDOW_WIDTH // 2
         self.last_pose_y = WINDOW_HEIGHT // 2
@@ -76,7 +81,6 @@ class SteeringLawApp:
 
         # callbacks
         self.window.on_draw = self.on_draw
-        # self.window.on_mouse_press = self.on_mouse_press
         self.window.on_key_press = self.on_key_press
 
         # pose detection setup
@@ -196,6 +200,37 @@ class SteeringLawApp:
     def apply_deadzone(self, val, deadzone):
         val = max(deadzone, min(1 - deadzone, val))
         return (val - deadzone) / (1 - 2 * deadzone)
+    
+    def read_delayed(self, now, true_x, true_y):
+        # returns the pointer position from `delay` ms ago
+        target = now - self.delay
+
+        # if the buffer is empty, return true coords. (first frame, nothing buffered yet)
+        if not self.pointer_buffer:
+            return true_x, true_y
+        # if buffer doesn't reach back to target yet, return oldest sample
+        elif self.pointer_buffer[0][0] > target:
+            return self.pointer_buffer[0][1], self.pointer_buffer[0][2]
+
+        # find index for which the timestamp is at or after target
+        for i in range(len(self.pointer_buffer)):
+            if self.pointer_buffer[i][0] >= target:
+                break
+
+        # target falls between before and after -> return whichever timestamp is nearer
+        after = self.pointer_buffer[i]
+        before = self.pointer_buffer[i - 1]
+        if abs(after[0] - target) <= abs(before[0] - target):
+            return after[1], after[2]
+        else:
+            return before[1], before[2]
+        
+    def update_pointer(self, true_x, true_y):
+        now = int(time.time() * 1000)
+        self.pointer_buffer.append((now, true_x, true_y))  # push the true position
+        self.last_pose_x, self.last_pose_y = self.read_delayed(
+            now, true_x, true_y
+        )  # read back the delayed position
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.Q or symbol == pyglet.window.key.ESCAPE:
@@ -208,6 +243,7 @@ class SteeringLawApp:
                 if self.game_state == "condition_complete":
                     self.setup_condition()
                     self.setup_logging()
+                self.pointer_buffer.clear()
                 self.game_state = "waiting_start"
 
     def update(self, dt):
@@ -215,8 +251,8 @@ class SteeringLawApp:
         if self.game_state in ("waiting_start", "trial_running") and (
             self.input_method == "mouse" or self.input_method == "touchpad"
         ):
-            self.last_pose_x = self.window._mouse_x
-            self.last_pose_y = self.window._mouse_y
+            true_x, true_y = self.window._mouse_x, self.window._mouse_y
+            self.update_pointer(true_x, true_y)
 
         # track cursor position for pose
         if self.input_method == "pose" and self.game_state in (
@@ -247,8 +283,8 @@ class SteeringLawApp:
             self.pose_mouse.position = (cursor_x, cursor_y)
 
             # lock red dot to window-relative cursor position
-            self.last_pose_x = self.window._mouse_x
-            self.last_pose_y = self.window._mouse_y
+            true_x, true_y = self.window._mouse_x, self.window._mouse_y
+            self.update_pointer(true_x, true_y)
 
         if self.game_state == "waiting_start":
             # check if pointer entered the start zone (left edge of tunnel)

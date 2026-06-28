@@ -9,6 +9,7 @@ import cv2
 import ctypes
 from mediapipe.tasks.python import vision
 from pynput.mouse import Controller
+from collections import deque
 
 from hand_detector.hand_detector import HandDetector
 from hand_detector.pointer import Pointer
@@ -31,6 +32,9 @@ SUBTITLE_FONT_SIZE = 26
 INFO_FONT_SIZE = 22
 SMALL_FONT_SIZE = 20
 
+# other
+DEQUE_LEN = 240
+
 
 class FittsLawApp:
     def __init__(self, config: dict):
@@ -48,6 +52,7 @@ class FittsLawApp:
         self.current_target_index = 0
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
         self.is_clicked = False
+        self.pointer_buffer = deque(maxlen=DEQUE_LEN)  # [timestamp_ms, x, y]
 
         self.last_pose_x = WINDOW_WIDTH // 2
         self.last_pose_y = WINDOW_HEIGHT // 2
@@ -189,6 +194,37 @@ class FittsLawApp:
                 "circle"
             ].color = CURRENT_TARGET_COLOR
 
+    def read_delayed(self, now, true_x, true_y):
+        # returns the pointer position from `delay` ms ago
+        target = now - self.delay
+
+        # if the buffer is empty, return true coords. (first frame, nothing buffered yet)
+        if not self.pointer_buffer:
+            return true_x, true_y
+        # if buffer doesn't reach back to target yet, return oldest sample
+        elif self.pointer_buffer[0][0] > target:
+            return self.pointer_buffer[0][1], self.pointer_buffer[0][2]
+
+        # find index for which the timestamp is at or after target
+        for i in range(len(self.pointer_buffer)):
+            if self.pointer_buffer[i][0] >= target:
+                break
+
+        # target falls between before and after -> return whichever timestamp is nearer
+        after = self.pointer_buffer[i]
+        before = self.pointer_buffer[i - 1]
+        if abs(after[0] - target) <= abs(before[0] - target):
+            return after[1], after[2]
+        else:
+            return before[1], before[2]
+
+    def update_pointer(self, true_x, true_y):
+        now = int(time.time() * 1000)
+        self.pointer_buffer.append((now, true_x, true_y))  # push the true position
+        self.last_pose_x, self.last_pose_y = self.read_delayed(
+            now, true_x, true_y
+        )  # read back the delayed position
+
     def handle_click(self, x, y):
         current_target = self.targets[self.sequence[self.current_target_index]]
         distance = math.sqrt(
@@ -215,7 +251,9 @@ class FittsLawApp:
         if self.game_state == "trial_running":
             if self.input_method == "mouse" or self.input_method == "touchpad":
                 if button == pyglet.window.mouse.LEFT:
-                    self.handle_click(x, y)
+                    self.handle_click(
+                        self.last_pose_x, self.last_pose_y
+                    )  # red dot instead of actual pointer for latency addition later
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.Q or symbol == pyglet.window.key.ESCAPE:
@@ -228,6 +266,7 @@ class FittsLawApp:
                 if self.game_state == "condition_complete":
                     self.setup_condition()
                     self.setup_logging()
+                self.pointer_buffer.clear()
                 self.random_start()
                 self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
                 self.game_state = "trial_running"
@@ -242,8 +281,8 @@ class FittsLawApp:
         if self.game_state == "trial_running" and (
             self.input_method == "mouse" or self.input_method == "touchpad"
         ):
-            self.last_pose_x = self.window._mouse_x
-            self.last_pose_y = self.window._mouse_y
+            true_x, true_y = self.window._mouse_x, self.window._mouse_y
+            self.update_pointer(true_x, true_y)
 
         if self.input_method == "pose" and self.game_state == "trial_running":
             frame_ok, frame = self.webcam.read()
@@ -273,9 +312,9 @@ class FittsLawApp:
 
             self.pose_mouse.position = (cursor_x, cursor_y)
 
-            # lock the red dot to the cursor position relative to the game window
-            self.last_pose_x = self.window._mouse_x
-            self.last_pose_y = self.window._mouse_y
+            # sample the true window-relative cursor (after pynput), feed to delay buffer
+            true_x, true_y = self.window._mouse_x, self.window._mouse_y
+            self.update_pointer(true_x, true_y)
 
             # use pointer.clicked property to check for clicks
             if pointer.clicked and not getattr(self, "is_clicked", False):
@@ -521,8 +560,3 @@ class FittsLawApp:
         self.cleanup_camera()
         if self.log_file:
             self.log_file.close()
-
-
-# TODO:
-# - change log structure ?
-# - find a good combination of parameters for the three different conditions to test out
