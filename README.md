@@ -21,3 +21,38 @@ detection not 100% guaranteed, can behave wonky
 
 Q can be used to quit but only when using -c True, otherwise you can use Ctrl-C. 
 If no hand is detected the cursor will be controlled by the mouse as is usual
+
+
+# Task 2, 3 and 4
+
+
+
+# Task 5
+
+## Method
+
+Here will be some lines about the study procedure. why this order of conditions etc
+
+## Procedure
+
+Here some lines about how the study went
+
+## Results
+
+Results go here and will link to a jupyter notebook that I will create
+
+## Discussion
+
+Interpretation of results goes here
+
+## Problems
+
+### Issues with the Method
+
+Balancing is basically non existent lmao
+
+### Issues with implementation
+
+The hand detector cou use some additional smoothing and maybe some code to reduce jitter
+and other smaller problems. However, since the detector works pretty decently for the 
+most part this was skipped due to time constraints.
