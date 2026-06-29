@@ -1,3 +1,11 @@
+# steering law application launcher
+
+# run with config. file:
+#   $env:PYTHONPATH="."; py task_3_steering_law/launcher_steering.py -c task_3_steering_law/example_config_steering.json                     
+
+# run specifying parameters:
+#   $env:PYTHONPATH="."; py task_3_steering_law/launcher_steering.py -p test -n 2 -i mouse -l 0 -d 300 -w 50
+
 import argparse
 import json
 import pyglet

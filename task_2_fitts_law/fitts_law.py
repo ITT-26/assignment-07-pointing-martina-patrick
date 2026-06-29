@@ -71,11 +71,12 @@ class FittsLawApp:
             width=WINDOW_WIDTH, height=WINDOW_HEIGHT, caption="Fitts' Law"
         )
 
+        # extract screen width and height
         user32 = ctypes.windll.user32
         self.screen_width = user32.GetSystemMetrics(0)
         self.screen_height = user32.GetSystemMetrics(1)
 
-        # bg color
+        # bg color for pyglet interface
         pyglet.gl.glClearColor(*[c / 255.0 for c in BG_COLOR], 1.0)
 
         # callbacks
@@ -86,7 +87,9 @@ class FittsLawApp:
         # pose detection setup
         self.hand_detector = None
         self.webcam = None
-        self.show_camera_feed = True  # True for debugging, False for app, LABEL_DEBUG
+        self.show_camera_feed = (
+            True  # True to show camera feed (useful for debugging) -- LABEL_DEBUG
+        )
         self.cam_deadzone = 0.1
 
         # first (or only) condition setup
@@ -95,14 +98,19 @@ class FittsLawApp:
         # pyglet update loop scheduling
         pyglet.clock.schedule_interval(self.update, 1 / 60.0)
 
+    # picks a random target index to start the test, and pre-computes the whole index sequence
+    # pairs index i with index i + num_targets/2 (the one across) - like the sample gif
     def random_start(self):
         num_targets = self.conditions[self.current_condition_index]["num_targets"]
-        start = random.randint(0, num_targets - 1)
+        start = random.randint(
+            0, num_targets - 1
+        )  # pick a random target index as a starting point
         self.sequence = []
         for i in range(num_targets // 2):
             self.sequence.append((start + i) % num_targets)
             self.sequence.append((start + i + num_targets // 2) % num_targets)
 
+    # update attributes (condition-specific parameters), setup camers (if needed), setup targets to draw later
     def setup_condition(self):
         self.input_method = self.conditions[self.current_condition_index][
             "input_method"
@@ -135,8 +143,9 @@ class FittsLawApp:
             circle = pyglet.shapes.Circle(x, y, self.radius, color=TARGET_COLOR)
             self.targets.append({"circle": circle, "x": x, "y": y, "index": n})
 
+    # log file creation with header
     def setup_logging(self):
-        pathlib.Path("results").mkdir(exist_ok=True)
+        pathlib.Path("task_2_fitts_law/results").mkdir(exist_ok=True)
         filename = (
             f"task_2_fitts_law/results/fitts_{self.participant_id}_{self.input_method}_"
             f"{self.delay}ms_{self.num_targets}_"
@@ -148,8 +157,9 @@ class FittsLawApp:
         )
         self.log_file.flush()
 
+    # new line in log file when click is detected
     def log_click(self, target_id, hit):
-        timestamp = int(time.time() * 1000)  # Unix ms abs
+        timestamp = int(time.time() * 1000)  # in ms, abs timestamps
         self.log_file.write(
             f"{self.current_repetition},{self.participant_id},{self.input_method},{self.delay},"
             f"{self.num_targets},{self.radius},{self.distance},"
@@ -157,6 +167,7 @@ class FittsLawApp:
         )
         self.log_file.flush()
 
+    # manages transitions to next repetition, condition, etc.
     def handle_transition(self):
         if self.current_target_index < self.num_targets - 1:
             # increment current target index
@@ -187,6 +198,7 @@ class FittsLawApp:
                 else:
                     self.game_state = "experiment_done"
 
+    # moves through the sequence and updates the visuals accordingly
     def update_visuals(self, old_target):
         old_target["circle"].color = TARGET_COLOR
         if self.game_state == "trial_running":
@@ -195,15 +207,24 @@ class FittsLawApp:
             ].color = CURRENT_TARGET_COLOR
 
     def read_delayed(self, now, true_x, true_y):
-        # returns the pointer position from `delay` ms ago
+        # target: timestamp [delay]ms ago
         target = now - self.delay
 
         # if the buffer is empty, return true coords. (first frame, nothing buffered yet)
         if not self.pointer_buffer:
             return true_x, true_y
-        # if buffer doesn't reach back to target yet, return oldest sample
+        # if the oldest timestamp is still newer than the target, return oldest sample
         elif self.pointer_buffer[0][0] > target:
             return self.pointer_buffer[0][1], self.pointer_buffer[0][2]
+
+        # it is very unlikely that we log a timestamp that is exactly = target:
+        #   - intervals are scheduled at 60 fps (pyglet), so the buffer is sampled at discrete intervals also
+        #   - time between two consectutive frames should be 1/60*1000 ~= 16.7 ms, but this isn't even the case
+        #     because of how everything is handled in each OS, latency, etc.
+        #   - 150 ms (delayed required in the assignment) is not a multiple of 16.7 ms
+        #   - we are rounding the `now` variable
+
+        # we try to find the two samples that enclose the actual value, and choose the nearest one
 
         # find index for which the timestamp is at or after target
         for i in range(len(self.pointer_buffer)):
@@ -218,6 +239,7 @@ class FittsLawApp:
         else:
             return before[1], before[2]
 
+    # push true pointer position into the buffer, update last position (attributes)
     def update_pointer(self, true_x, true_y):
         now = int(time.time() * 1000)
         self.pointer_buffer.append((now, true_x, true_y))  # push the true position
@@ -225,17 +247,20 @@ class FittsLawApp:
             now, true_x, true_y
         )  # read back the delayed position
 
+    # check if click landed inside the target
     def handle_click(self, x, y):
         current_target = self.targets[self.sequence[self.current_target_index]]
+        # calculate euclidean distance between center of the circle and the click coords.
         distance = math.sqrt(
             (x - current_target["x"]) ** 2 + (y - current_target["y"]) ** 2
         )
 
         target_id = current_target["index"]
 
+        # if the calculated distance is smaller than the circle's radius, it means the click was inside the circle
         if distance <= self.radius:
-            print("HIT!")  # LABEL_DEBUG
-            # Log hit
+            print("HIT!")  # -- LABEL_DEBUG
+            # log hit
             self.log_click(target_id, hit=True)
             old_target = self.targets[self.sequence[self.current_target_index]]
             # handle transition to next target/end of repetition or condition
@@ -243,22 +268,26 @@ class FittsLawApp:
             # update screen
             self.update_visuals(old_target)
         else:
-            print("MISS")  # LABEL_DEBUG
+            print("MISS")  # -- LABEL_DEBUG
             # log miss
             self.log_click(target_id, hit=False)
 
+    # call handle click on mouse press when trial is running
     def on_mouse_press(self, x, y, button, modifiers):
         if self.game_state == "trial_running":
             if self.input_method == "mouse" or self.input_method == "touchpad":
                 if button == pyglet.window.mouse.LEFT:
                     self.handle_click(
                         self.last_pose_x, self.last_pose_y
-                    )  # red dot instead of actual pointer for latency addition later
+                    )  # red dot instead of actual pointer for latency visualization
 
+    # handle keyboard input
     def on_key_press(self, symbol, modifiers):
+        # 'q' or [ESC] to quit
         if symbol == pyglet.window.key.Q or symbol == pyglet.window.key.ESCAPE:
             self.cleanup()
             pyglet.app.exit()
+        # [SPACE] to advance through the trial
         elif symbol == pyglet.window.key.SPACE:
             if self.game_state == "init_screen":
                 self.game_state = "condition_complete"
@@ -271,38 +300,42 @@ class FittsLawApp:
                 self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
                 self.game_state = "trial_running"
 
-    # deadzone logic from pointing_input.py
+    # deadzone logic, taken from pointing_input.py
     def apply_deadzone(self, val, deadzone):
         val = max(deadzone, min(1 - deadzone, val))
         return (val - deadzone) / (1 - 2 * deadzone)
 
+    # update - called every frame
     def update(self, dt):
-        # track cursor position for mouse/touchpad
+        # MOUSE AND TOUCHPAD
+        # track cursor position 
         if self.game_state == "trial_running" and (
             self.input_method == "mouse" or self.input_method == "touchpad"
         ):
             true_x, true_y = self.window._mouse_x, self.window._mouse_y
-            self.update_pointer(true_x, true_y)
+            self.update_pointer(true_x, true_y)  # push new position into buffer each frame
 
+        # POSE
         if self.input_method == "pose" and self.game_state == "trial_running":
-            frame_ok, frame = self.webcam.read()
+            frame_ok, frame = self.webcam.read()  # grab camera frame
             if not frame_ok:
                 return
 
             # parse the camera frame
-            pointer, annotated_image = self.hand_detector.get_pointer_state(frame)
+            pointer, annotated_image = self.hand_detector.get_pointer_state(frame)  # returns a normalized (x,y) pointer, annotated img
 
             if self.show_camera_feed:
-                cv2.imshow("Pose Debug", annotated_image)
+                cv2.imshow("Pose Debug", annotated_image)  # camera feedback if show_camera_feed == True (for tests and debugging mainly)
 
             # invalid pointer check
             if pointer == Pointer.invalid_pointer():
                 return
 
+            # normalized pointer coords., taking into account deadzone (implemented in task 1 to reduce jitter)
             norm_x = self.apply_deadzone(pointer.x, self.cam_deadzone)
             norm_y = self.apply_deadzone(pointer.y, self.cam_deadzone)
 
-            # map to absolute OS screen space
+            # multiply normalized coords by screen dimensions to get absolute pixel positions
             cursor_x = norm_x * self.screen_width
             cursor_y = norm_y * self.screen_height
 
@@ -310,19 +343,22 @@ class FittsLawApp:
             if not hasattr(self, "pose_mouse"):
                 self.pose_mouse = Controller()
 
+            # move using abs coords.
             self.pose_mouse.position = (cursor_x, cursor_y)
 
-            # sample the true window-relative cursor (after pynput), feed to delay buffer
+            # get the pyglet window-relative cursor (after pynput), feed to delay buffer
             true_x, true_y = self.window._mouse_x, self.window._mouse_y
             self.update_pointer(true_x, true_y)
 
             # use pointer.clicked property to check for clicks
+            # like in task 1, a held gesture only fires handle_click once, not every frame
             if pointer.clicked and not getattr(self, "is_clicked", False):
                 self.handle_click(self.last_pose_x, self.last_pose_y)
                 self.is_clicked = True
             elif not pointer.clicked:
                 self.is_clicked = False
 
+    # init screen
     def draw_init_screen(self):
         # title
         title = pyglet.text.Label(
@@ -373,6 +409,7 @@ class FittsLawApp:
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
+    # repetition (iteration) complete screen
     def draw_rep_complete_screen(self):
         pyglet.text.Label(
             f"Repetition {self.current_repetition} of {self.repetitions} complete!",
@@ -394,6 +431,7 @@ class FittsLawApp:
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
+    # new condition screen
     def draw_condition_screen(self):
         # title
         pyglet.text.Label(
@@ -439,7 +477,7 @@ class FittsLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
-        # repetitions (separate emphasis also)
+        # repetitions
         pyglet.text.Label(
             f"You will need to repeat this task {self.repetitions} times.",
             x=WINDOW_WIDTH // 2,
@@ -461,6 +499,7 @@ class FittsLawApp:
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
+    # experiment done screen
     def draw_exp_done_screen(self):
         pyglet.text.Label(
             "Experiment complete!",
@@ -490,6 +529,7 @@ class FittsLawApp:
             color=(*COMMANDS_TEXT_COLOR, 255),
         ).draw()
 
+    # info that is shown while trial is running
     def draw_hud(self):
         # repetition
         pyglet.text.Label(
@@ -524,6 +564,7 @@ class FittsLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+    # draw
     def on_draw(self):
         self.window.clear()
         if self.game_state == "trial_running":
@@ -546,6 +587,7 @@ class FittsLawApp:
         elif self.game_state == "experiment_done":
             self.draw_exp_done_screen()
 
+    # cleanup
     def cleanup_camera(self):
         if self.webcam:
             self.webcam.release()
@@ -556,6 +598,7 @@ class FittsLawApp:
             except cv2.error:
                 pass
 
+    # cleanup
     def cleanup(self):
         self.cleanup_camera()
         if self.log_file:
