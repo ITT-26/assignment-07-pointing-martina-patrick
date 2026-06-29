@@ -1,7 +1,7 @@
 # fitts law application launcher
 
 # run with config. file:
-#   $env:PYTHONPATH="."; py task_2_fitts_law/launcher_fitts.py -c task_2_fitts_law/test_config.json                     
+#   $env:PYTHONPATH="."; py task_2_fitts_law/launcher_fitts.py -c task_2_fitts_law/example_config_fitts.json                     
 
 # run specifying parameters:
 #   $env:PYTHONPATH="."; py task_2_fitts_law/launcher.py -p test -n 2 -i mouse -l 0 -d 300 -r 50 -t 6
