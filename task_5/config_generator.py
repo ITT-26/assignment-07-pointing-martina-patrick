@@ -1,3 +1,5 @@
+# config generator for task 5 trials
+
 import json
 import random
 
@@ -14,23 +16,27 @@ INPUT_DEVICES = [
                   # if it was random we would have to open and close the webcam several times
 ]
 
+# chosen distances and radii for fitts law test
 FITTS_DISTANCES = [350, 450, 550]
 FITTS_RADII = [25, 40, 55]
 
+# chosen distances and widths for steering law test
 STEERING_DISTANCES = [400, 600, 800]
 STEERING_WIDTHS = [60, 100, 140]
 
+# resulting config file path
 CONFIG_FILE_PATH = "study_config.json"
 
 
+# config for fitts
 def fitts_conditions(rng):
     conditions = []
     for input_method, delay in INPUT_DEVICES:
         grid = []
         for d in FITTS_DISTANCES:
             for r in FITTS_RADII:
-                grid.append((d, r))
-        rng.shuffle(grid)  # difficulty order varies
+                grid.append((d, r))  # store all combinations
+        rng.shuffle(grid)  # vary order
         for distance, radius in grid:
             conditions.append(
                 {
@@ -44,7 +50,7 @@ def fitts_conditions(rng):
             )
     return conditions
 
-
+# config for steering
 def steering_conditions(rng):
     conditions = []
     for input_method, delay in INPUT_DEVICES:
@@ -52,7 +58,7 @@ def steering_conditions(rng):
         for d in STEERING_DISTANCES:
             for r in STEERING_WIDTHS:
                 grid.append((d, r))
-        rng.shuffle(grid)  # difficulty order varies
+        rng.shuffle(grid)  # difficulty order variation
         for distance, width in grid:
             conditions.append(
                 {

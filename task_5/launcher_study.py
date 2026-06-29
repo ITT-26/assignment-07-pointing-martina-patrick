@@ -1,11 +1,10 @@
-import argparse
-import json
-import pyglet
-
 # use:
 #   $env:PYTHONPATH="."; py task_5/launcher_study.py -c task_5/study_config.json -p test -T fitts
 #   $env:PYTHONPATH="."; py task_5/launcher_study.py -c task_5/study_config.json -p test -T steering
 
+import argparse
+import json
+import pyglet
 
 from task_2_fitts_law.fitts_law import (
     FittsLawApp,
