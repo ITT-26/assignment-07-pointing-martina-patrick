@@ -145,7 +145,7 @@ class FittsLawApp:
 
     # log file creation with header
     def setup_logging(self):
-        pathlib.Path("results").mkdir(exist_ok=True)
+        pathlib.Path("task_2_fitts_law/results").mkdir(exist_ok=True)
         filename = (
             f"task_2_fitts_law/results/fitts_{self.participant_id}_{self.input_method}_"
             f"{self.delay}ms_{self.num_targets}_"
