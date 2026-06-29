@@ -554,6 +554,26 @@ class SteeringLawApp:
 
             self.draw_hud()
 
+            pyglet.text.Label(
+                "Start",
+                x=WINDOW_WIDTH/2 - self.distance/2,
+                y=WINDOW_HEIGHT/2 - self.width/2 - WALL_THICKNESS - 15,
+                anchor_x="center",
+                anchor_y="center",
+                font_size=SMALL_FONT_SIZE,
+                color=(*COMMANDS_TEXT_COLOR, 255),
+            ).draw()
+
+            pyglet.text.Label(
+                "End",
+                x=WINDOW_WIDTH/2 + self.distance/2,
+                y=WINDOW_HEIGHT/2 - self.width/2 - WALL_THICKNESS - 15,
+                anchor_x="center",
+                anchor_y="center",
+                font_size=SMALL_FONT_SIZE,
+                color=(*CURRENT_TARGET_COLOR, 255),
+            ).draw()
+
         elif self.game_state == "init_screen":
             self.draw_init_screen()
         elif self.game_state == "repetition_complete":
