@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,marti,mouse,150,100,400,0,1782725549852,1782725550420
+2,marti,mouse,150,100,400,0,1782725552165,1782725552771
+3,marti,mouse,150,100,400,0,1782725554464,1782725555099

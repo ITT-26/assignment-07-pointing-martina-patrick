@@ -1,0 +1,37 @@
+{
+  "participant_id": "del",
+  "conditions": [
+    {
+      "input_method": "mouse",
+      "delay": 0,
+      "num_targets": 3,
+      "radius": 30,
+      "distance": 450,
+      "repetitions": 1
+    },
+    {
+      "input_method": "mouse",
+      "delay": 150,
+      "num_targets": 7,
+      "radius": 30,
+      "distance": 450,
+      "repetitions": 1
+    },
+    {
+      "input_method": "mouse",
+      "delay": 0,
+      "num_targets": 9,
+      "radius": 40,
+      "distance": 400,
+      "repetitions": 1
+    },
+    {
+      "input_method": "mouse",
+      "delay": 0,
+      "num_targets": 10,
+      "radius": 50,
+      "distance": 300,
+      "repetitions": 1
+    }
+  ]
+}

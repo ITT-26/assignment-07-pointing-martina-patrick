@@ -142,7 +142,6 @@ def validate_config(config: dict) -> None:
                 f"Distance ({condition['distance']}) must be <= {WINDOW_WIDTH} - 60"
             )
         # width (space between rectangles), takes into account some padding and also the drawn rectangles' width
-        # TODO: change when rectangles are drawn
         if condition["width"] > WINDOW_HEIGHT - 100:
             raise ValueError(
                 f"Condition {i}: tunnel doesn't fit on screen. "

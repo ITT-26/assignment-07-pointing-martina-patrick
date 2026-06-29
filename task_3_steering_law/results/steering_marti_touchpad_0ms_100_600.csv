@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,marti,touchpad,0,100,600,1,1782725695673,1782725697216
+2,marti,touchpad,0,100,600,0,1782725699151,1782725699753
+3,marti,touchpad,0,100,600,0,1782725701478,1782725702098

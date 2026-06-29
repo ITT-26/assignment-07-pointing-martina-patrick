@@ -1,0 +1,550 @@
+{
+  "fitts": {
+    "conditions": [
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 55,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 450,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 550,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 25,
+        "distance": 350,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "num_targets": 8,
+        "radius": 40,
+        "distance": 450,
+        "repetitions": 3
+      }
+    ]
+  },
+  "steering": {
+    "conditions": [
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 100,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 140,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 100,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 100,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 140,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 60,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 60,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 140,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 0,
+        "width": 60,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 140,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 60,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 100,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 100,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 140,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 60,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 140,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 60,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "mouse",
+        "delay": 150,
+        "width": 100,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 100,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 60,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 60,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 140,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 100,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 140,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 60,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 100,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "touchpad",
+        "delay": 0,
+        "width": 140,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 60,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 100,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 60,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 100,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 140,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 140,
+        "distance": 800,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 140,
+        "distance": 600,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 60,
+        "distance": 400,
+        "repetitions": 3
+      },
+      {
+        "input_method": "pose",
+        "delay": 0,
+        "width": 100,
+        "distance": 400,
+        "repetitions": 3
+      }
+    ]
+  }
+}

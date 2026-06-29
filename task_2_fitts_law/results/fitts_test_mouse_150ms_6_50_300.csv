@@ -1,7 +1,0 @@
-iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,hit,timestamp
-0,test,mouse,150,6,50,300,5,1,1782647547977
-0,test,mouse,150,6,50,300,2,1,1782647548811
-0,test,mouse,150,6,50,300,0,1,1782647549716
-0,test,mouse,150,6,50,300,3,1,1782647550830
-0,test,mouse,150,6,50,300,1,1,1782647551797
-0,test,mouse,150,6,50,300,4,1,1782647552788

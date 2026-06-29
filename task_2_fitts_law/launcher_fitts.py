@@ -29,7 +29,7 @@ def main() -> None:
         "-r", "--radius", type=int, help="Target radius"
     )  # target radius
     parser.add_argument(
-        "-t", "--num_targets", type=int, help="Number of targets (between 2 and 10)"
+        "-t", "--num_targets", type=int, help="Number of targets (even, between 2 and 10)"
     )  # number of targets
 
     args = parser.parse_args()
@@ -126,6 +126,10 @@ def validate_config(config: dict) -> None:
             raise ValueError(
                 f"Condition {i}: num_targets must be between 2 and 10, got: {condition['num_targets']}"
             )
+        if condition["num_targets"] % 2 != 0:
+            raise ValueError(
+                f"Condition {i}: num_targets must be an even number"
+            )            
         if condition["radius"] <= 0:
             raise ValueError(
                 f"Condition {i}: radius must be positive, got: {condition['radius']}"
