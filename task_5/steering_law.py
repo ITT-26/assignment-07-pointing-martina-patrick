@@ -517,9 +517,9 @@ class SteeringLawApp:
 
         pyglet.text.Label(
             f"Input method: {self.input_method}",
-            x=10,
+            x=WINDOW_WIDTH // 2,
             y=30,
-            anchor_x="left",
+            anchor_x="center",
             anchor_y="center",
             font_size=SMALL_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),

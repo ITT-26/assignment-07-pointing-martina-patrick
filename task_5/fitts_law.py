@@ -1,7 +1,9 @@
-# here goes your Steering Law application
+# here goes your Fitts' Law application
 
 import pyglet
 import time
+import math
+import random
 import pathlib
 import cv2
 import ctypes
@@ -30,14 +32,11 @@ SUBTITLE_FONT_SIZE = 26
 INFO_FONT_SIZE = 22
 SMALL_FONT_SIZE = 20
 
-WALL_THICKNESS = 20
-START_ZONE_WIDTH = 20
-
 # other
 DEQUE_LEN = 240
 
 
-class SteeringLawApp:
+class FittsLawApp:
     def __init__(self, config: dict):
 
         # extract info from config file
@@ -50,10 +49,9 @@ class SteeringLawApp:
         # state trackers
         self.current_condition_index = 0
         self.current_repetition = 0
-        self.current_errors = 0
-        self.trial_start_time = None
-        self.pointer_inside = False
+        self.current_target_index = 0
         self.game_state = "init_screen"  # "init_screen", "trial_running", "repetition_complete", "condition_complete", "experiment_done"
+        self.is_clicked = False
         self.pointer_buffer = deque(maxlen=DEQUE_LEN)  # [timestamp_ms, x, y]
 
         self.last_pose_x = WINDOW_WIDTH // 2
@@ -63,13 +61,14 @@ class SteeringLawApp:
         # condition-specific parameters
         self.input_method = None
         self.delay = None
-        self.width = None
+        self.num_targets = None
+        self.radius = None
         self.distance = None
         self.repetitions = None
 
         # screen and window setup
         self.window = pyglet.window.Window(
-            width=WINDOW_WIDTH, height=WINDOW_HEIGHT, caption="Steering's Law"
+            width=WINDOW_WIDTH, height=WINDOW_HEIGHT, caption="Fitts' Law"
         )
 
         user32 = ctypes.windll.user32
@@ -81,6 +80,7 @@ class SteeringLawApp:
 
         # callbacks
         self.window.on_draw = self.on_draw
+        self.window.on_mouse_press = self.on_mouse_press
         self.window.on_key_press = self.on_key_press
 
         # pose detection setup
@@ -95,12 +95,21 @@ class SteeringLawApp:
         # pyglet update loop scheduling
         pyglet.clock.schedule_interval(self.update, 1 / 60.0)
 
+    def random_start(self):
+        num_targets = self.conditions[self.current_condition_index]["num_targets"]
+        start = random.randint(0, num_targets - 1)
+        self.sequence = []
+        for i in range(num_targets // 2):
+            self.sequence.append((start + i) % num_targets)
+            self.sequence.append((start + i + num_targets // 2) % num_targets)
+
     def setup_condition(self):
         self.input_method = self.conditions[self.current_condition_index][
             "input_method"
         ]
         self.delay = self.conditions[self.current_condition_index]["delay"]
-        self.width = self.conditions[self.current_condition_index]["width"]
+        self.num_targets = self.conditions[self.current_condition_index]["num_targets"]
+        self.radius = self.conditions[self.current_condition_index]["radius"]
         self.distance = self.conditions[self.current_condition_index]["distance"]
         self.repetitions = self.conditions[self.current_condition_index]["repetitions"]
 
@@ -111,96 +120,80 @@ class SteeringLawApp:
             if self.show_camera_feed:
                 cv2.namedWindow("Pose Debug")
         elif self.input_method != "pose" and self.webcam is not None:
+            # release camera assets if moving to a non-pose condition
             self.cleanup_camera()
 
-        # tunnel geometry
+        # get center of the window
         center_x = WINDOW_WIDTH / 2
         center_y = WINDOW_HEIGHT / 2
 
-        tunnel_left = center_x - self.distance / 2
-        tunnel_right = center_x + self.distance / 2
-        wall_bottom_y = center_y - self.width / 2
-        wall_top_y = center_y + self.width / 2
-
-        # walls
-        self.wall_bottom = pyglet.shapes.Rectangle(
-            x=tunnel_left,
-            y=wall_bottom_y - WALL_THICKNESS,
-            width=self.distance,
-            height=WALL_THICKNESS,
-            color=TARGET_COLOR,
-        )
-        self.wall_top = pyglet.shapes.Rectangle(
-            x=tunnel_left,
-            y=wall_top_y,
-            width=self.distance,
-            height=WALL_THICKNESS,
-            color=TARGET_COLOR,
-        )
-
-        # start and end lines
-        self.start_line = pyglet.shapes.Line(
-            tunnel_left,
-            wall_bottom_y,
-            tunnel_left,
-            wall_top_y,
-            thickness=2,
-            color=COMMANDS_TEXT_COLOR,
-        )
-        self.end_line = pyglet.shapes.Line(
-            tunnel_right,
-            wall_bottom_y,
-            tunnel_right,
-            wall_top_y,
-            thickness=2,
-            color=CURRENT_TARGET_COLOR,
-        )
+        self.targets = []
+        for n in range(self.num_targets):
+            angle = (2 * math.pi * n) / self.num_targets
+            x = center_x + (self.distance / 2) * math.cos(angle)
+            y = center_y + (self.distance / 2) * math.sin(angle)
+            circle = pyglet.shapes.Circle(x, y, self.radius, color=TARGET_COLOR)
+            self.targets.append({"circle": circle, "x": x, "y": y, "index": n})
 
     def setup_logging(self):
-        pathlib.Path("task_3_steering_law/results").mkdir(parents=True, exist_ok=True)
+        pathlib.Path("results").mkdir(exist_ok=True)
         filename = (
-            f"task_3_steering_law/results/steering_{self.participant_id}_{self.input_method}_"
-            f"{self.delay}ms_{self.width}_{self.distance}.csv"
+            f"task_2_fitts_law/results/fitts_{self.participant_id}_{self.input_method}_"
+            f"{self.delay}ms_{self.num_targets}_"
+            f"{self.radius}_{self.distance}.csv"
         )
         self.log_file = open(filename, "w")
         self.log_file.write(
-            "iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time\n"
+            "iteration,part_id,input_method,delay,num_targets,radius,distance,target_id,hit,timestamp\n"
         )
         self.log_file.flush()
 
-    def log_trial(self, start_time, end_time):
+    def log_click(self, target_id, hit):
+        timestamp = int(time.time() * 1000)  # Unix ms abs
         self.log_file.write(
-            f"{self.current_repetition + 1},{self.participant_id},{self.input_method},{self.delay},"
-            f"{self.width},{self.distance},{self.current_errors},{start_time},{end_time}\n"
+            f"{self.current_repetition},{self.participant_id},{self.input_method},{self.delay},"
+            f"{self.num_targets},{self.radius},{self.distance},"
+            f"{target_id},{1 if hit else 0},{timestamp}\n"
         )
         self.log_file.flush()
 
     def handle_transition(self):
-        if self.current_repetition < self.repetitions - 1:
-            self.current_repetition += 1
-            self.current_errors = 0
-            self.trial_start_time = None
-            self.pointer_inside = False
-            self.game_state = "repetition_complete"
-        else:
-            if self.current_condition_index < len(self.conditions) - 1:
-                self.current_condition_index += 1
-                self.current_repetition = 0
-                self.current_errors = 0
-                self.trial_start_time = None
-                self.pointer_inside = False
-                if self.log_file:
-                    self.log_file.close()
-                self.setup_condition()
-                self.setup_logging()
-                self.game_state = "condition_complete"
+        if self.current_target_index < self.num_targets - 1:
+            # increment current target index
+            self.current_target_index += 1
+        elif self.current_target_index == self.num_targets - 1:
+            if self.current_repetition < self.repetitions - 1:
+                # increment current repetition
+                self.current_repetition += 1
+                # reset target index
+                self.current_target_index = 0
+                # setup new start
+                self.random_start()
+                self.game_state = "repetition_complete"
             else:
-                self.game_state = "experiment_done"
+                if self.current_condition_index < len(self.conditions) - 1:
+                    # increment current condition
+                    self.current_condition_index += 1
+                    # reset repetition tracker
+                    self.current_repetition = 0
+                    self.current_target_index = 0
+                    # setup new condition and logging
+                    self.setup_condition()
+                    # close current file
+                    if self.log_file:
+                        self.log_file.close()
+                    self.setup_logging()
+                    self.game_state = "condition_complete"
+                else:
+                    self.game_state = "experiment_done"
 
-    def apply_deadzone(self, val, deadzone):
-        val = max(deadzone, min(1 - deadzone, val))
-        return (val - deadzone) / (1 - 2 * deadzone)
-    
+    def update_visuals(self, old_target):
+        old_target["circle"].color = TARGET_COLOR
+        if self.game_state == "trial_running":
+            self.targets[self.sequence[self.current_target_index]][
+                "circle"
+            ].color = CURRENT_TARGET_COLOR
+
     def read_delayed(self, now, true_x, true_y):
         # returns the pointer position from `delay` ms ago
         target = now - self.delay
@@ -224,13 +217,43 @@ class SteeringLawApp:
             return after[1], after[2]
         else:
             return before[1], before[2]
-        
+
     def update_pointer(self, true_x, true_y):
         now = int(time.time() * 1000)
         self.pointer_buffer.append((now, true_x, true_y))  # push the true position
         self.last_pose_x, self.last_pose_y = self.read_delayed(
             now, true_x, true_y
         )  # read back the delayed position
+
+    def handle_click(self, x, y):
+        current_target = self.targets[self.sequence[self.current_target_index]]
+        distance = math.sqrt(
+            (x - current_target["x"]) ** 2 + (y - current_target["y"]) ** 2
+        )
+
+        target_id = current_target["index"]
+
+        if distance <= self.radius:
+            print("HIT!")  # LABEL_DEBUG
+            # Log hit
+            self.log_click(target_id, hit=True)
+            old_target = self.targets[self.sequence[self.current_target_index]]
+            # handle transition to next target/end of repetition or condition
+            self.handle_transition()
+            # update screen
+            self.update_visuals(old_target)
+        else:
+            print("MISS")  # LABEL_DEBUG
+            # log miss
+            self.log_click(target_id, hit=False)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        if self.game_state == "trial_running":
+            if self.input_method == "mouse" or self.input_method == "touchpad":
+                if button == pyglet.window.mouse.LEFT:
+                    self.handle_click(
+                        self.last_pose_x, self.last_pose_y
+                    )  # red dot instead of actual pointer for latency addition later
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.Q or symbol == pyglet.window.key.ESCAPE:
@@ -244,100 +267,66 @@ class SteeringLawApp:
                     self.setup_condition()
                     self.setup_logging()
                 self.pointer_buffer.clear()
-                self.game_state = "waiting_start"
+                self.random_start()
+                self.targets[self.sequence[0]]["circle"].color = CURRENT_TARGET_COLOR
+                self.game_state = "trial_running"
+
+    # deadzone logic from pointing_input.py
+    def apply_deadzone(self, val, deadzone):
+        val = max(deadzone, min(1 - deadzone, val))
+        return (val - deadzone) / (1 - 2 * deadzone)
 
     def update(self, dt):
         # track cursor position for mouse/touchpad
-        if self.game_state in ("waiting_start", "trial_running") and (
+        if self.game_state == "trial_running" and (
             self.input_method == "mouse" or self.input_method == "touchpad"
         ):
             true_x, true_y = self.window._mouse_x, self.window._mouse_y
             self.update_pointer(true_x, true_y)
 
-        # track cursor position for pose
-        if self.input_method == "pose" and self.game_state in (
-            "waiting_start",
-            "trial_running",
-        ):
+        if self.input_method == "pose" and self.game_state == "trial_running":
             frame_ok, frame = self.webcam.read()
             if not frame_ok:
                 return
 
+            # parse the camera frame
             pointer, annotated_image = self.hand_detector.get_pointer_state(frame)
 
             if self.show_camera_feed:
                 cv2.imshow("Pose Debug", annotated_image)
 
+            # invalid pointer check
             if pointer == Pointer.invalid_pointer():
                 return
 
             norm_x = self.apply_deadzone(pointer.x, self.cam_deadzone)
             norm_y = self.apply_deadzone(pointer.y, self.cam_deadzone)
 
+            # map to absolute OS screen space
             cursor_x = norm_x * self.screen_width
             cursor_y = norm_y * self.screen_height
 
+            # initialize pynput mouse controller to move the desktop pointer
             if not hasattr(self, "pose_mouse"):
                 self.pose_mouse = Controller()
 
             self.pose_mouse.position = (cursor_x, cursor_y)
 
-            # lock red dot to window-relative cursor position
+            # sample the true window-relative cursor (after pynput), feed to delay buffer
             true_x, true_y = self.window._mouse_x, self.window._mouse_y
             self.update_pointer(true_x, true_y)
 
-        if self.game_state == "waiting_start":
-            # check if pointer entered the start zone (left edge of tunnel)
-            center_x = WINDOW_WIDTH / 2
-            center_y = WINDOW_HEIGHT / 2
-            tunnel_left = center_x - self.distance / 2
-            wall_bottom_y = center_y - self.width / 2
-            wall_top_y = center_y + self.width / 2
-
-            in_start_zone = (
-                tunnel_left <= self.last_pose_x <= tunnel_left + START_ZONE_WIDTH
-                and wall_bottom_y <= self.last_pose_y <= wall_top_y
-            )
-
-            if in_start_zone:
-                # pointer entered start zone: start the clock and begin trial
-                self.trial_start_time = int(time.time() * 1000)
-                self.game_state = "trial_running"
-
-        elif self.game_state == "trial_running":
-            center_x = WINDOW_WIDTH / 2
-            center_y = WINDOW_HEIGHT / 2
-            tunnel_left = center_x - self.distance / 2
-            tunnel_right = center_x + self.distance / 2
-            wall_bottom_y = center_y - self.width / 2
-            wall_top_y = center_y + self.width / 2
-
-            # check if pointer is inside the tunnel
-            in_tunnel = (
-                tunnel_left <= self.last_pose_x <= tunnel_right
-                and wall_bottom_y <= self.last_pose_y <= wall_top_y
-            )
-
-            if in_tunnel:
-                # pointer is back inside after an error: reset flag
-                self.pointer_inside = True
-
-                # check if pointer reached the end zone
-                if self.last_pose_x >= tunnel_right - START_ZONE_WIDTH:
-                    # trial complete: log and transition
-                    end_time = int(time.time() * 1000)
-                    self.log_trial(self.trial_start_time, end_time)
-                    self.handle_transition()
-            else:
-                # pointer is outside tunnel walls
-                if self.pointer_inside:
-                    # only count as new error if pointer was inside before
-                    self.current_errors += 1
-                    self.pointer_inside = False
+            # use pointer.clicked property to check for clicks
+            if pointer.clicked and not getattr(self, "is_clicked", False):
+                self.handle_click(self.last_pose_x, self.last_pose_y)
+                self.is_clicked = True
+            elif not pointer.clicked:
+                self.is_clicked = False
 
     def draw_init_screen(self):
+        # title
         title = pyglet.text.Label(
-            "Steering Law Test",
+            "Fitts' Law Test",
             x=WINDOW_WIDTH // 2,
             y=WINDOW_HEIGHT // 2 + 200,
             anchor_x="center",
@@ -348,8 +337,9 @@ class SteeringLawApp:
         title.bold = True
         title.draw()
 
+        # instructions
         pyglet.text.Label(
-            "Guide the pointer through the tunnel\nwithout touching the walls.",
+            "Point at and click on the orange target\nas fast as you can.",
             x=WINDOW_WIDTH // 2,
             y=WINDOW_HEIGHT // 2 + 50,
             anchor_x="center",
@@ -361,6 +351,7 @@ class SteeringLawApp:
             align="center",
         ).draw()
 
+        # show participant ID
         pyglet.text.Label(
             f"Participant ID: {self.participant_id}",
             x=WINDOW_WIDTH // 2,
@@ -371,6 +362,7 @@ class SteeringLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+        # controls
         pyglet.text.Label(
             "[SPACE]: start/continue | 'q' / [ESC]: quit",
             x=WINDOW_WIDTH // 2,
@@ -403,6 +395,7 @@ class SteeringLawApp:
         ).draw()
 
     def draw_condition_screen(self):
+        # title
         pyglet.text.Label(
             f"Condition {self.current_condition_index + 1} of {len(self.conditions)}:",
             x=WINDOW_WIDTH // 2,
@@ -413,6 +406,7 @@ class SteeringLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+        # input method (large and highlighted since it's important for the user if the condition changes)
         pyglet.text.Label(
             f"Input: {self.input_method}",
             x=WINDOW_WIDTH // 2,
@@ -423,6 +417,7 @@ class SteeringLawApp:
             color=TARGET_COLOR,
         ).draw()
 
+        # delay
         pyglet.text.Label(
             f"Delay: {self.delay} ms",
             x=WINDOW_WIDTH // 2,
@@ -433,8 +428,9 @@ class SteeringLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+        # task parameters
         pyglet.text.Label(
-            f"Width: {self.width}  |  Distance: {self.distance}",
+            f"Targets: {self.num_targets}  |  Radius: {self.radius}  |  Distance: {self.distance}",
             x=WINDOW_WIDTH // 2,
             y=WINDOW_HEIGHT // 2 + 20,
             anchor_x="center",
@@ -443,6 +439,7 @@ class SteeringLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+        # repetitions (separate emphasis also)
         pyglet.text.Label(
             f"You will need to repeat this task {self.repetitions} times.",
             x=WINDOW_WIDTH // 2,
@@ -453,6 +450,7 @@ class SteeringLawApp:
             color=BODY_TEXT_COLOR,
         ).draw()
 
+        # instructions
         pyglet.text.Label(
             "Press [SPACE] to start",
             x=WINDOW_WIDTH // 2,
@@ -473,7 +471,6 @@ class SteeringLawApp:
             font_size=LARGE_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
-
         pyglet.text.Label(
             "Thank you for participating.",
             x=WINDOW_WIDTH // 2,
@@ -483,7 +480,6 @@ class SteeringLawApp:
             font_size=INFO_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
-
         pyglet.text.Label(
             "'q' / [ESC]: quit",
             x=WINDOW_WIDTH // 2,
@@ -495,6 +491,7 @@ class SteeringLawApp:
         ).draw()
 
     def draw_hud(self):
+        # repetition
         pyglet.text.Label(
             f"Rep: {self.current_repetition + 1}/{self.repetitions}",
             x=WINDOW_WIDTH - 10,
@@ -505,6 +502,7 @@ class SteeringLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+        # condition
         pyglet.text.Label(
             f"Condition: {self.current_condition_index + 1}/{len(self.conditions)}",
             x=10,
@@ -515,45 +513,30 @@ class SteeringLawApp:
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
+        # input method
         pyglet.text.Label(
             f"Input method: {self.input_method}",
-            x=10,
+            x=WINDOW_WIDTH // 2,
             y=30,
-            anchor_x="left",
+            anchor_x="center",
             anchor_y="center",
             font_size=SMALL_FONT_SIZE,
             color=(*BODY_TEXT_COLOR, 255),
         ).draw()
 
-        # errors counter during trial
-        pyglet.text.Label(
-            f"Errors: {self.current_errors}",
-            x=WINDOW_WIDTH // 2,
-            y=WINDOW_HEIGHT - 30,
-            anchor_x="center",
-            anchor_y="center",
-            font_size=SMALL_FONT_SIZE,
-            color=(*CURRENT_TARGET_COLOR, 255),
-        ).draw()
-
     def on_draw(self):
         self.window.clear()
+        if self.game_state == "trial_running":
+            for target in self.targets:
+                target["circle"].draw()
 
-        if self.game_state in ("waiting_start", "trial_running"):
-            # draw tunnel
-            self.wall_bottom.draw()
-            self.wall_top.draw()
-            self.start_line.draw()
-            self.end_line.draw()
-
-            # draw pointer dot
-            pointer_dot = pyglet.shapes.Circle(
-                self.last_pose_x, self.last_pose_y, 10, color=POINTER_COLOR
-            )
-            pointer_dot.draw()
+            if hasattr(self, "last_pose_x"):
+                pointer_dot = pyglet.shapes.Circle(
+                    self.last_pose_x, self.last_pose_y, 10, color=(255, 0, 0)
+                )
+                pointer_dot.draw()
 
             self.draw_hud()
-
         elif self.game_state == "init_screen":
             self.draw_init_screen()
         elif self.game_state == "repetition_complete":
