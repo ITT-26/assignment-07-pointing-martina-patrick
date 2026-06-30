@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,martina,touchpad,0,140,400,0,1782830855616,1782830855971
+2,martina,touchpad,0,140,400,0,1782830858099,1782830858406
+3,martina,touchpad,0,140,400,0,1782830860073,1782830860427

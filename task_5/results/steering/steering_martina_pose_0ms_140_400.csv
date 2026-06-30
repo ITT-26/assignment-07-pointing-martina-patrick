@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,martina,pose,0,140,400,0,1782831030368,1782831030972
+2,martina,pose,0,140,400,0,1782831033407,1782831033865
+3,martina,pose,0,140,400,0,1782831036160,1782831036756

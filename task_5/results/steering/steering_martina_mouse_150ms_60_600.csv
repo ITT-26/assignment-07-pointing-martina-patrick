@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,martina,mouse,150,60,600,0,1782830800626,1782830801534
+2,martina,mouse,150,60,600,0,1782830803567,1782830804581
+3,martina,mouse,150,60,600,0,1782830806757,1782830807583
