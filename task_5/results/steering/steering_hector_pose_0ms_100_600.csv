@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,hector,pose,0,100,600,0,1782843491752,1782843492697
+2,hector,pose,0,100,600,0,1782843495178,1782843496169
+3,hector,pose,0,100,600,0,1782843498793,1782843499627

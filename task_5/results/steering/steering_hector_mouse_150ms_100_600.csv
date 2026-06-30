@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,hector,mouse,150,100,600,0,1782843389727,1782843390667
+2,hector,mouse,150,100,600,0,1782843392415,1782843393153
+3,hector,mouse,150,100,600,0,1782843394885,1782843395525

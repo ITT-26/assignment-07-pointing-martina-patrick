@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,hector,touchpad,0,60,600,0,1782843411247,1782843411817
+2,hector,touchpad,0,60,600,0,1782843413447,1782843414172
+3,hector,touchpad,0,60,600,0,1782843415730,1782843416317
