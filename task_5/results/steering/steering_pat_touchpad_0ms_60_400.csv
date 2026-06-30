@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,pat,touchpad,0,60,400,0,1782853076028,1782853077704
+2,pat,touchpad,0,60,400,0,1782853079136,1782853080363
+3,pat,touchpad,0,60,400,0,1782853081794,1782853083096

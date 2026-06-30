@@ -1,0 +1,4 @@
+iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
+1,pat,mouse,0,140,600,0,1782852924572,1782852925347
+2,pat,mouse,0,140,600,0,1782852926577,1782852927380
+3,pat,mouse,0,140,600,0,1782852929011,1782852930316
