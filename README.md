@@ -261,11 +261,51 @@ Here some lines about how the study went
 
 ## Results
 
-Results go here and will link to a jupyter notebook that I will create
+The visualizations for the results can be found in `task_5/results` and are 
+saved as pdfs. 
+
+We tested 4 input methods - mouse, mouse with delay, hand detection and touchpad -
+by using a fitts law and a steering law test
+
+### Fitts
+
+It can be seen that the Throughput of the mouse is the best of all tested input 
+methods. Mouse with delay performs a good bit worse but still manages to beat
+the touchpad. The hand as an input device performed worse than the rest. The
+mouse with delay shows the least variance of all tested methods.
+
+In terms of accuracy for fitts law all input methods performed well, shoing a high 
+mean accuracy and a low variance. The only outlier here is the hand, which
+has a mean accuracy of only 70% and a high variance. 
 
 ## Discussion
 
-Interpretation of results goes here
+### Fitts
+
+We can safely say that the hand detection performed worst of all methods.
+One theory for this is that while participants are usually used to a mouse or
+touchpad, using the finger as pointer and touching the thumb and middle finger
+for a click is an approach not many people have seen yet. Another factor is the 
+quality of the hand detection. Since the detection does not work perfectly it
+can very well happen for clicks to be registered on accident, for one click to 
+turn into mutliples, for a click to be not registered or for the pointer to jitter 
+and jump around right before the click, causing the user to miss the target.
+
+Users will probably have no muscle memory when using their hand and will therefore 
+have to move slower and adjust their pointer more often, causing a significant 
+decrease in throughput. 
+
+These factors could all lead to the hand detection performing quite worse when
+compared to all the other input methods. 
+
+The touchpads throughput may be less when compared to the mouse since lifting 
+the finger and tapping costs time at every click.
+
+Even though the delay of 150ms led to worse results it was still above the touchpad.
+It can be argued that muscle memory does not suffer from delay and the only factor 
+leading to a decreased throughput is users waiting for the pointer to arrive
+at the target before actually clicking. That takes potentially less time than the
+fingerlifting, tapping and repositioning the touchpad requires.
 
 ## Problems
 
@@ -275,6 +315,18 @@ Since we only had a run with 3 participants it was basically impossible to count
 this study. Apart from that a study with 3 participants (of which 2 designed the study and
 therefore has knowledge beforehand) has little value. If at all it would be used to check
 for an initial effect or to test the setup like a pilot study.
+
+### Issues with Procedure
+
+One participant used their own laptop for the study and not the same machine that was used
+by the two other participants. This means that a different screen resolution,
+refresh rate and many other factors could influence and skew the results. This is 
+insanely bad practice, but since this is not a real study that will be published
+we decided it was okay (since otherwise there would have not been any time to recruit
+a third participant). In addition to using another device this person also used 
+software that shares a mouse between Computers (specifically "Mouse without Borders"
+provided by the Windows PowerToys suite). This can of course also greatly affect
+the way the mouse behaved in the experiment.
 
 ### Issues with implementation
 
