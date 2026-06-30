@@ -2,6 +2,8 @@
 #   $env:PYTHONPATH="."; py task_5/launcher_study.py -c task_5/study_config.json -p test -T fitts
 #   $env:PYTHONPATH="."; py task_5/launcher_study.py -c task_5/study_config.json -p test -T steering
 
+#   -o overrides the output dir (default: task_5/results/<task>)  
+
 import argparse
 import json
 import pyglet
@@ -122,10 +124,20 @@ def main() -> None:
         choices=["fitts", "steering"],
         help="Which task block to run",
     )
+    parser.add_argument(
+            "-o",
+            "--output_dir",
+            type=str,
+            default=None,
+            help="Directory for study result CSVs (default: task_5/results/<task>)",
+    )
     args = parser.parse_args()
 
     full_config = load_config(args.config)
     config = build_config(full_config, args.participant_id, args.task)
+    full_config = load_config(args.config)
+    config = build_config(full_config, args.participant_id, args.task)
+    config["output_dir"] = args.output_dir or f"task_5/results/{args.task}"
 
     if args.task == "fitts":
         validate_fitts(config)

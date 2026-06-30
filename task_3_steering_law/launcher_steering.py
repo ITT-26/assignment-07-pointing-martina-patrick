@@ -6,6 +6,8 @@
 # run specifying parameters:
 #   $env:PYTHONPATH="."; py task_3_steering_law/launcher_steering.py -p test -n 2 -i mouse -l 0 -d 300 -w 50
 
+#   output dir (where log files are saved) can be specified in any case
+
 import argparse
 import json
 import pyglet
@@ -18,6 +20,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     # json config file
     parser.add_argument("-c", "--config", type=str, help="Path to JSON config file")
+
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        type=str,
+        help="Directory for result CSVs (default: task_3_steering_law/results)",
+    )  # output dir
 
     # parameters - required if no config file is provided
     parser.add_argument(
@@ -67,6 +76,9 @@ def main() -> None:
                 }
             ],
         }
+
+    if args.output_dir:
+        steering_config["output_dir"] = args.output_dir
 
     # validate config
     validate_config(steering_config)

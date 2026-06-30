@@ -1,10 +1,12 @@
 # fitts law application launcher
 
 # run with config. file:
-#   $env:PYTHONPATH="."; py task_2_fitts_law/launcher_fitts.py -c task_2_fitts_law/example_config_fitts.json                     
+#   $env:PYTHONPATH="."; py task_2_fitts_law/launcher_fitts.py -c task_2_fitts_law/example_config_fitts.json
 
 # run specifying parameters:
 #   $env:PYTHONPATH="."; py task_2_fitts_law/launcher_fitts.py -p test -n 2 -i mouse -l 0 -d 300 -r 50 -t 6
+
+#   output dir (where log files are saved) can be specified in any case
 
 import argparse
 import json
@@ -18,6 +20,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     # json config file
     parser.add_argument("-c", "--config", type=str, help="Path to JSON config file")
+
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        type=str,
+        help="Directory for result CSVs (default: task_2_fitts_law/results)",
+    )  # output dir
 
     # parameters - required if no config file is provided
     parser.add_argument(
@@ -37,7 +46,10 @@ def main() -> None:
         "-r", "--radius", type=int, help="Target radius"
     )  # target radius
     parser.add_argument(
-        "-t", "--num_targets", type=int, help="Number of targets (even, between 2 and 10)"
+        "-t",
+        "--num_targets",
+        type=int,
+        help="Number of targets (even, between 2 and 10)",
     )  # number of targets
 
     args = parser.parse_args()
@@ -75,6 +87,9 @@ def main() -> None:
             ],
         }
 
+    if args.output_dir:
+        fitts_config["output_dir"] = args.output_dir
+
     # validate config
     validate_config(fitts_config)
 
@@ -110,14 +125,21 @@ def validate_config(config: dict) -> None:
         raise ValueError("conditions must be a non-empty list")
 
     for i, condition in enumerate(config["conditions"]):
-        required_condition_fields = ["num_targets", "radius", "distance", "repetitions", "input_method", "delay"]
+        required_condition_fields = [
+            "num_targets",
+            "radius",
+            "distance",
+            "repetitions",
+            "input_method",
+            "delay",
+        ]
 
         missing_condition = [
             field for field in required_condition_fields if field not in condition
         ]
         if missing_condition:
             raise ValueError(f"Condition {i} missing fields: {missing_condition}")
-        
+
         # validate input_method
         valid_methods = ["pose", "mouse", "touchpad"]
         if condition["input_method"] not in valid_methods:
@@ -135,9 +157,7 @@ def validate_config(config: dict) -> None:
                 f"Condition {i}: num_targets must be between 2 and 10, got: {condition['num_targets']}"
             )
         if condition["num_targets"] % 2 != 0:
-            raise ValueError(
-                f"Condition {i}: num_targets must be an even number"
-            )            
+            raise ValueError(f"Condition {i}: num_targets must be an even number")
         if condition["radius"] <= 0:
             raise ValueError(
                 f"Condition {i}: radius must be positive, got: {condition['radius']}"
@@ -154,7 +174,7 @@ def validate_config(config: dict) -> None:
         # check if targets fit on screen
         MAX_DISTANCE_FROM_CENTER = min(WINDOW_WIDTH, WINDOW_HEIGHT) / 2
 
-        farthest_point = condition["distance"]/2 + condition["radius"]
+        farthest_point = condition["distance"] / 2 + condition["radius"]
         if farthest_point > MAX_DISTANCE_FROM_CENTER:
             raise ValueError(
                 f"Condition {i}: targets don't fit on screen. "

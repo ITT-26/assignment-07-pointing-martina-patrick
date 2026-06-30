@@ -36,6 +36,7 @@ START_END_THICKNESS = 3
 
 # other
 DEQUE_LEN = 240
+DEFAULT_RESULTS_DIR = "task_3_steering_law/results"
 
 
 class SteeringLawApp:
@@ -44,6 +45,7 @@ class SteeringLawApp:
         # extract info from config file
         self.participant_id = config["participant_id"]
         self.conditions = config["conditions"]
+        self.results_dir = config.get("output_dir", DEFAULT_RESULTS_DIR)
 
         # log file
         self.log_file = None
@@ -168,9 +170,9 @@ class SteeringLawApp:
 
     # log file creation with header
     def setup_logging(self):
-        pathlib.Path("task_3_steering_law/results").mkdir(parents=True, exist_ok=True)
-        filename = (
-            f"task_3_steering_law/results/steering_{self.participant_id}_{self.input_method}_"
+        pathlib.Path(self.results_dir).mkdir(parents=True, exist_ok=True)
+        filename = pathlib.Path(self.results_dir) / (
+            f"steering_{self.participant_id}_{self.input_method}_"
             f"{self.delay}ms_{self.width}_{self.distance}.csv"
         )
         self.log_file = open(filename, "w")

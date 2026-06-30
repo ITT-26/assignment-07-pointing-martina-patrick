@@ -1,4 +1,0 @@
-iteration,part_id,input_method,delay,width,distance,errors,start_time,end_time
-1,marti,pose,0,60,400,0,1782725825873,1782725827441
-2,marti,pose,0,60,400,0,1782725829921,1782725831361
-3,marti,pose,0,60,400,0,1782725833985,1782725835217

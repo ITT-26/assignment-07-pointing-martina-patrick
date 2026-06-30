@@ -208,8 +208,6 @@ timing of the next one.
 
 # Task 5
 
-(!) should we explain how to run the task-5-specific launcher to replicate the trial and talk about the changes made to the config? also say where results are saved?
-
 DISCLAIMER: Usually data/results would not be uploaded via git directly to avoid clutter.
 Since we will only have data for 3 participants and the results will not be shared via
 other sources we decided to include the results directly in the repo.
@@ -255,6 +253,10 @@ important. We will ask users to rate the following statements on likert scales f
 ## Procedure
 
 Here some lines about how the study went
+
+- how did we acquire participants
+- how we explained the task
+- etc
 
 ## Results
 

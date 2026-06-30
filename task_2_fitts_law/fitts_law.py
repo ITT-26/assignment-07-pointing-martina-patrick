@@ -34,6 +34,7 @@ SMALL_FONT_SIZE = 20
 
 # other
 DEQUE_LEN = 240
+DEFAULT_RESULTS_DIR = "task_2_fitts_law/results"  # default path to save logs
 
 
 class FittsLawApp:
@@ -42,6 +43,7 @@ class FittsLawApp:
         # extract info from config file
         self.participant_id = config["participant_id"]
         self.conditions = config["conditions"]
+        self.results_dir = config.get("output_dir", DEFAULT_RESULTS_DIR)  # override output path if given in the config file or via command line parameters
 
         # log file
         self.log_file = None
@@ -145,9 +147,9 @@ class FittsLawApp:
 
     # log file creation with header
     def setup_logging(self):
-        pathlib.Path("task_2_fitts_law/results").mkdir(exist_ok=True)
-        filename = (
-            f"task_2_fitts_law/results/fitts_{self.participant_id}_{self.input_method}_"
+        pathlib.Path(self.results_dir).mkdir(parents=True, exist_ok=True)
+        filename = pathlib.Path(self.results_dir) / (
+            f"fitts_{self.participant_id}_{self.input_method}_"
             f"{self.delay}ms_{self.num_targets}_"
             f"{self.radius}_{self.distance}.csv"
         )
@@ -259,7 +261,7 @@ class FittsLawApp:
 
         # if the calculated distance is smaller than the circle's radius, it means the click was inside the circle
         if distance <= self.radius:
-            print("HIT!")  # -- LABEL_DEBUG
+            # print("HIT!")  # -- LABEL_DEBUG
             # log hit
             self.log_click(target_id, hit=True)
             old_target = self.targets[self.sequence[self.current_target_index]]
@@ -268,7 +270,7 @@ class FittsLawApp:
             # update screen
             self.update_visuals(old_target)
         else:
-            print("MISS")  # -- LABEL_DEBUG
+            # print("MISS")  # -- LABEL_DEBUG
             # log miss
             self.log_click(target_id, hit=False)
 
