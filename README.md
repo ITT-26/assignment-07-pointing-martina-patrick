@@ -2,8 +2,9 @@
 
 # Venv
 
-We are using Python 3.14 for this assignment. It is recommended to create a 
-venv for this project
+## Patrick
+I used Python 3.14 and the requirements-patrick.txt modules. Everything worked this way
+(at least on my machine ;))
 
 # Task 1
 
