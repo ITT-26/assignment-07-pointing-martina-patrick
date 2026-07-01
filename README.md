@@ -240,7 +240,7 @@ scenario and then what we actually did in our specific scenario.
 
 Optimally, the number of participants would be determined by the experiment setup. 
 In our case we have 4 input techniques as conditions, on top of that we have 3 radii and
-3 distances for Fitt's Law as well as 3 lengths and 3 widths for steering law. To 
+3 distances for Fitts' Law as well as 3 lengths and 3 widths for steering law. To 
 counterbalance this we can use a latin square approach. Using all possible combinations
 to do so would result in 4 x 3 x 3 = 36 conditions and would therefore need 36 participants
 if we were to counterbalance this with a latin square. 
@@ -305,58 +305,66 @@ could switch hands between repetitions.
 
 ## Results
 
-The visualizations for the results can be found in `task_5/results` and are 
-saved as pdfs. 
+Raw per-trial data for all three participants is available in the
+[`data`](task_5/data) folder (one CSV per condition). The plots referenced
+below are saved as PDFs in [`task_5/results`](task_5/results).
 
 We tested 4 input methods - mouse, mouse with latency, hand detection and touchpad -
 by using a Fitts' Law and a Steering Law test.
 
 ### Fitts
 
-It can be seen that the throughput of the mouse is the best of all tested input 
-methods. Mouse with delay performs a good bit worse but still manages to beat
-the touchpad. The hand as an input device performed worse than the rest. The
-mouse with delay shows the least variance of all tested methods.
+It can be seen that the throughput ([`fitts_tp.pdf`](task_5/results/fitts_tp.pdf))
+of the mouse is the best of all tested input methods. Mouse with delay
+performs a good bit worse but still manages to beat the touchpad. The hand as
+an input device performed worse than the rest. The mouse with delay shows the
+least variance of all tested methods.
 
-In terms of accuracy for fitts law all input methods performed well, shoing a high 
-mean accuracy and a low variance. The only outlier here is the hand, which
-has a mean accuracy of only 70% and a high variance. 
+In terms of accuracy ([`fitts_ac.pdf`](task_5/results/fitts_ac.pdf)) for
+fitts law all input methods performed well, showing a high mean accuracy and
+a low variance. The only outlier here is the hand, which has a mean accuracy
+of only 70% and a high variance.
 
 Breaking down throughput and movement time by index of difficulty
-(`fitts_tp_by_id.pdf`, `fitts_mt_by_id.pdf`), the same ranking observed above
-(mouse > mouse+delay ≈ touchpad > pose) holds across the whole difficulty
-range tested (ID ≈ 2.1-3.6 bits). Movement time for mouse, mouse+delay and
-touchpad increases roughly linearly with ID; pose increases more steeply and
-with more noise, including a marked jump at the highest ID tested.
+([`fitts_tp_by_id.pdf`](task_5/results/fitts_tp_by_id.pdf),
+[`fitts_mt_by_id.pdf`](task_5/results/fitts_mt_by_id.pdf)), the same ranking
+observed above (mouse > mouse+delay ≈ touchpad > pose) holds across the whole
+difficulty range tested (ID ≈ 2.1-3.6 bits). Movement time for mouse,
+mouse+delay and touchpad increases roughly linearly with ID; pose increases
+more steeply and with more noise, including a marked jump at the highest ID
+tested.
 
-Accuracy by difficulty (`fitts_acc_by_id.pdf`) shows mouse, mouse+delay and
-touchpad staying consistently above 90% regardless of ID, while pose
-fluctuates between 58% and 91% without a clear trend against ID.
+Accuracy by difficulty ([`fitts_acc_by_id.pdf`](task_5/results/fitts_acc_by_id.pdf))
+shows mouse, mouse+delay and touchpad staying consistently above 90%
+regardless of ID, while pose fluctuates between 58% and 91% without a clear
+trend against ID.
 
 ### Steering
 
-Completion time by input method (`steering_ct.pdf`) shows mouse as the
-fastest method with the tightest spread, followed by mouse+delay and
-touchpad, which overlap considerably with each other. Pose is the slowest
-method and also shows the widest spread.
+Completion time ([`steering_ct.pdf`](task_5/results/steering_ct.pdf)) by
+input method shows mouse as the fastest method with the tightest spread,
+followed by mouse with delay and touchpad, which overlap considerably with
+each other. Pose is the slowest method and also shows the widest spread.
 
-Error rate by input method (`steering_err.pdf`) shows mouse with the lowest
-error rate and least variance. Mouse+delay, touchpad and pose all show higher
-and more variable error rates, with no single method standing out as clearly
-worse the way pose did for completion time.
+Error rate ([`steering_err.pdf`](task_5/results/steering_err.pdf)) by input
+method shows mouse with the lowest error rate and least variance. Mouse with
+delay, touchpad and pose all show higher and more variable error rates, with
+no single method standing out as clearly worse the way pose did for
+completion time.
 
-Movement time and throughput by difficulty (`steering_mt_by_id.pdf`,
-`steering_tp_by_id.pdf`) follow the same ranking as above across the whole
-difficulty range tested: mouse fastest / highest throughput,
-followed by touchpad and mouse+delay overlapping and crossing each other, and
-pose consistently slowest / lowest throughput. Movement time for all methods
+Movement time and throughput by difficulty
+([`steering_mt_by_id.pdf`](task_5/results/steering_mt_by_id.pdf),
+[`steering_tp_by_id.pdf`](task_5/results/steering_tp_by_id.pdf)) follow the
+same ranking as above: mouse fastest / highest throughput, followed by
+touchpad and mouse with delay overlapping and crossing each other, and pose
+consistently slowest / lowest throughput. Movement time for all methods
 increases with ID.
 
-Error rate by difficulty (`steering_err_by_id.pdf`) is noisier than the other
-two metrics: no input method shows a consistently low or high error rate
-across the whole ID range, though touchpad and pose reach the highest error
-rates at high difficulty, while mouse stays at or near 0% for
-most of the range.
+Error rate by difficulty ([`steering_err_by_id.pdf`](task_5/results/steering_err_by_id.pdf))
+is noisier than the other two metrics: no input method shows a consistently
+low or high error rate across the whole ID range, though touchpad and pose
+reach the highest error rates at high difficulty, while mouse stays at or
+near 0% for most of the range.
 
 ## Discussion
 
@@ -418,7 +426,7 @@ considerably for a given condition.
 ## Feedback Survey
 
 After completing both tasks, participants rated each input method using a
-survey (see Method/Procedure).
+survey (see Method/Procedure). Results can be seen in ([`feedback_survey.pdf`](task_5/results/feedback_survey.pdf)).
 
 Mouse (no delay) scored highest or tied-highest on all three statements,
 including a unanimous top rating on "I had no problems using this input
