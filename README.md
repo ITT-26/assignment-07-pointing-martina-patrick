@@ -316,12 +316,12 @@ by using a Fitts' Law and a Steering Law test.
 
 It can be seen that the throughput ([`fitts_tp.pdf`](task_5/results/fitts_tp.pdf))
 of the mouse is the best of all tested input methods. Mouse with delay
-performs a good bit worse but still manages to beat the touchpad. The hand as
+performs a bit worse but still manages to beat the touchpad. The hand as
 an input device performed worse than the rest. The mouse with delay shows the
 least variance of all tested methods.
 
 In terms of accuracy ([`fitts_ac.pdf`](task_5/results/fitts_ac.pdf)) for
-fitts law all input methods performed well, showing a high mean accuracy and
+Fitts' Law all input methods performed well, showing a high mean accuracy and
 a low variance. The only outlier here is the hand, which has a mean accuracy
 of only 70% and a high variance.
 
@@ -399,16 +399,16 @@ Looking at the difficulty breakdown, the gap between input methods does not
 noticeably shrink at low difficulty or grow at high difficulty, but pose remains
 clearly worse across the entire range tested. This suggests the performance
 gap is driven more by fundamental differences between the input methods than by
-how demanding a specific condition is. The wide, ID-independent fluctuation in
+how demanding a specific condition is. The fluctuation in
 pose accuracy points in the same direction: it looks more consistent with
 detector reliability issues (see Problems) than with task difficulty.
 
 ### Steering
 
-As with Fitts, pose performed worst overall, and presumably for the same
-reasons: no established muscle memory for hand-based pointing, and detection
-noise/jitter that likely caused the hand-tracked pointer to touch the tunnel
-walls more often than a mouse or touchpad would.
+As with Fitts, pose performed worst overall. Having taken part in the study
+ourselves, we can say that detection noise/jitter is likely the main reason
+the hand-tracked pointer touched the tunnel walls more often than a mouse or
+touchpad would.
 
 Touchpad and mouse+delay perform similarly to each other and worse than plain
 mouse. For mouse+delay, the constant
