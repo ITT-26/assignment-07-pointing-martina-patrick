@@ -1,13 +1,27 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/KfEU5Azw)
 
-# Venv
+# Setup
 
 ## Patrick
 I used Python 3.14 and the requirements-patrick.txt modules. Everything worked this way
 (at least on my machine ;))
 
+```bash
+python -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+pip install -r requirements-patrick.txt
+```
+
 ## Martina
 I used Python 3.13.2 and the requirements-martina.txt modules. 
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+pip install -r requirements-martina.txt
+```
 
 # Task 1
 
@@ -252,16 +266,42 @@ We can use a quesstionnaire, but it will only contain some questions that we con
 important. We will ask users to rate the following statements on likert scales from 
 1 (Strongly disagree) to 7 (strongly agree):
 - Using this input method was pleasant
-- This input method feels natural and intuitive to use
+- This input method felt natural and intuitive to use
 - I had no problems using this input method
+
+## Participants
+
+Three participants took part: the two of us, plus one person outside the ITT
+course. Participants were free to use either hand for the pose condition and
+could switch hands between repetitions.
 
 ## Procedure
 
-Here some lines about how the study went
-
-- how did we acquire participants
-- how we explained the task
-- etc
+1. Conditions were pre-generated with a fixed random seed. For Fitts' Law we
+   tested 3 target distances (350, 450, 550 px) and 3 target radii (25, 40,
+   55 px), with the number of targets fixed at 8; for Steering Law we tested
+   3 tunnel distances (400, 600, 800 px) and 3 tunnel widths (60, 100, 140
+   px). Crossing these gives 9 distance/radius (or distance/width)
+   combinations per task, times 4 input device blocks (mouse, mouse + 150ms
+   delay, touchpad, pose) = 36 distinct conditions per task. In terms of
+   index of difficulty (ID = log2(D/W + 1) for Fitts, with W = 2 x radius;
+   ID = D/W for Steering), this covers roughly 2.1-3.6 bits for Fitts and
+   2.9-13.3 for Steering. Each condition was repeated 3 times in a row,
+   giving 108 trials per task and 216 per participant in total.
+2. Participants were briefed on both tasks and given time to try each input
+   method beforehand, especially pose input, which was new to everyone.
+3. Fitts' Law was run first, then Steering Law, in the same fixed order for
+   all participants (see Method for why we did not counterbalance).
+4. Each task had to be started manually per device block: launching the
+   corresponding application with the right parameters, explaining the task
+   to the participant, and assisting them as needed.
+5. During pose conditions, the webcam feed was kept visible so participants
+   could see what the hand detector was tracking.
+6. Participants could take breaks between conditions or repetitions.
+7. Two of the three participants used the same computer; the third used their
+   own laptop (see Problems).
+8. After both tasks, participants filled out the short feedback questionnaire
+   described in Method.
 
 ## Results
 
@@ -269,11 +309,11 @@ The visualizations for the results can be found in `task_5/results` and are
 saved as pdfs. 
 
 We tested 4 input methods - mouse, mouse with latency, hand detection and touchpad -
-by using a fitts law and a steering law test
+by using a Fitts' Law and a Steering Law test.
 
 ### Fitts
 
-It can be seen that the Throughput of the mouse is the best of all tested input 
+It can be seen that the throughput of the mouse is the best of all tested input 
 methods. Mouse with delay performs a good bit worse but still manages to beat
 the touchpad. The hand as an input device performed worse than the rest. The
 mouse with delay shows the least variance of all tested methods.
@@ -282,7 +322,41 @@ In terms of accuracy for fitts law all input methods performed well, shoing a hi
 mean accuracy and a low variance. The only outlier here is the hand, which
 has a mean accuracy of only 70% and a high variance. 
 
+Breaking down throughput and movement time by index of difficulty
+(`fitts_tp_by_id.pdf`, `fitts_mt_by_id.pdf`), the same ranking observed above
+(mouse > mouse+delay ≈ touchpad > pose) holds across the whole difficulty
+range tested (ID ≈ 2.1-3.6 bits). Movement time for mouse, mouse+delay and
+touchpad increases roughly linearly with ID; pose increases more steeply and
+with more noise, including a marked jump at the highest ID tested.
+
+Accuracy by difficulty (`fitts_acc_by_id.pdf`) shows mouse, mouse+delay and
+touchpad staying consistently above 90% regardless of ID, while pose
+fluctuates between 58% and 91% without a clear trend against ID.
+
 ### Steering
+
+Completion time by input method (`steering_ct.pdf`) shows mouse as the
+fastest method with the tightest spread, followed by mouse+delay and
+touchpad, which overlap considerably with each other. Pose is the slowest
+method and also shows the widest spread.
+
+Error rate by input method (`steering_err.pdf`) shows mouse with the lowest
+error rate and least variance. Mouse+delay, touchpad and pose all show higher
+and more variable error rates, with no single method standing out as clearly
+worse the way pose did for completion time.
+
+Movement time and throughput by difficulty (`steering_mt_by_id.pdf`,
+`steering_tp_by_id.pdf`) follow the same ranking as above across the whole
+difficulty range tested: mouse fastest / highest throughput,
+followed by touchpad and mouse+delay overlapping and crossing each other, and
+pose consistently slowest / lowest throughput. Movement time for all methods
+increases with ID.
+
+Error rate by difficulty (`steering_err_by_id.pdf`) is noisier than the other
+two metrics: no input method shows a consistently low or high error rate
+across the whole ID range, though touchpad and pose reach the highest error
+rates at high difficulty, while mouse stays at or near 0% for
+most of the range.
 
 ## Discussion
 
@@ -313,7 +387,51 @@ leading to a decreased throughput is users waiting for the pointer to arrive
 at the target before actually clicking. That takes potentially less time than the
 fingerlifting, tapping and repositioning the touchpad requires.
 
+Looking at the difficulty breakdown, the gap between input methods does not
+noticeably shrink at low difficulty or grow at high difficulty, but pose remains
+clearly worse across the entire range tested. This suggests the performance
+gap is driven more by fundamental differences between the input methods than by
+how demanding a specific condition is. The wide, ID-independent fluctuation in
+pose accuracy points in the same direction: it looks more consistent with
+detector reliability issues (see Problems) than with task difficulty.
+
 ### Steering
+
+As with Fitts, pose performed worst overall, and presumably for the same
+reasons: no established muscle memory for hand-based pointing, and detection
+noise/jitter that likely caused the hand-tracked pointer to touch the tunnel
+walls more often than a mouse or touchpad would.
+
+Touchpad and mouse+delay perform similarly to each other and worse than plain
+mouse. For mouse+delay, the constant
+150ms lag likely forces users to move more cautiously to avoid overshooting
+into the walls, which costs time and, unlike Fitts, does not fully protect
+against errors. For touchpad, the smaller sensing surface can sometimes make it harder to hold a
+precise straight path through narrower tunnels.
+
+Error rate did not show as clean a separation between methods as completion
+time did. This is likely partly a measurement limitation: error rate only
+counts discrete wall-exit events per trial, so with just 3 participants and 3
+repetitions per condition, a single unlucky wall touch can swing the rate
+considerably for a given condition.
+
+## Feedback Survey
+
+After completing both tasks, participants rated each input method using a
+survey (see Method/Procedure).
+
+Mouse (no delay) scored highest or tied-highest on all three statements,
+including a unanimous top rating on "I had no problems using this input
+method". This was not surprising, given it is by far the most familiar input method of
+the four.
+
+Touchpad and mouse+delay scored similarly to each other, roughly in the
+middle across all three statements. 
+
+Pose scored clearly lowest on "pleasant" and "no problems". However, it did not score dramatically worse on "felt natural and
+intuitive to use". Hadn't 2 out of 3 participants of the study been the ones who designed the gesture, getting this result in a larger study could suggest 
+that pose input weaker performance stems more from hand detection
+reliability and precision than from the underlying interaction concept.
 
 ## Problems
 
@@ -336,8 +454,29 @@ software that shares a mouse between Computers (specifically "Mouse without Bord
 provided by the Windows PowerToys suite). This can of course also greatly affect
 the way the mouse behaved in the experiment.
 
-### Issues with implementation
+Running through all 72 conditions with their repetitions (36 for Fitts, 36 for Steering, 3 repetitions each) per
+participant made for a fairly long session. Even with breaks allowed between
+conditions, participants got visibly more tired as the session went on, which
+likely affected performance in the later conditions regardless of input method
+or difficulty level, on top of the learning effect discussed above.
 
-The hand detector cou use some additional smoothing and maybe some code to reduce jitter
+Lighting conditions in the room were not controlled or kept consistent across
+sessions, and pose-based hand detection is known to be sensitive to lighting.
+Some of the accuracy differences we observed for the pose condition may
+therefore be partly attributable to lighting rather than to the input method
+itself.
+
+### Issues with Implementation
+
+The hand detector could use some additional smoothing and maybe some code to reduce jitter
 and other smaller problems. However, since the detector works pretty decently for the 
 most part this was skipped due to time constraints.
+
+Additionally, none of the three launchers support pausing or resuming a
+session: if a run is interrupted unexpectedly (like a crash, or the
+participant needing an extended break), there is no way to continue from a
+specific condition, the whole task has to be restarted from the beginning.
+
+# Disclaimer - AI Usage
+
+AI was used to assist plot generation and to help write parts of this README file (based on our own appreciations and conclusions).
