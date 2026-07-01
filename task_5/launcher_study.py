@@ -2,7 +2,7 @@
 #   $env:PYTHONPATH="."; py task_5/launcher_study.py -c task_5/study_config.json -p test -T fitts
 #   $env:PYTHONPATH="."; py task_5/launcher_study.py -c task_5/study_config.json -p test -T steering
 
-#   -o overrides the output dir (default: task_5/results/<task>)  
+#   -o overrides the output dir (default: task_5/data/<task>)  
 
 import argparse
 import json
@@ -47,9 +47,9 @@ def build_config(full_config: dict, participant_id: str, task: str) -> dict:
     return {"participant_id": participant_id, "conditions": block["conditions"]}
 
 
-# NOTE ON VALIDATION: for the study, we don't accept command line parameters anymore; instead we use a pre-made config file
-# therefore validation isn't that relevant
-# we include it anyways in case the config generator made a mistake
+# NOTE ON VALIDATION: for the study, we don't accept command line parameters for experiment-related things anymore; instead we use a pre-made config file
+# therefore validation isn't that relevant for most of the parameters
+# we include it anyways in case we made a mistake in the config generator
 
 
 # validates arguments - FITTS - taken from task 2 launcher
@@ -129,15 +129,13 @@ def main() -> None:
             "--output_dir",
             type=str,
             default=None,
-            help="Directory for study result CSVs (default: task_5/results/<task>)",
+            help="Directory for study result CSVs (default: task_5/data/<task>)",
     )
     args = parser.parse_args()
 
     full_config = load_config(args.config)
     config = build_config(full_config, args.participant_id, args.task)
-    full_config = load_config(args.config)
-    config = build_config(full_config, args.participant_id, args.task)
-    config["output_dir"] = args.output_dir or f"task_5/results/{args.task}"
+    config["output_dir"] = args.output_dir or f"task_5/data/{args.task}"
 
     if args.task == "fitts":
         validate_fitts(config)

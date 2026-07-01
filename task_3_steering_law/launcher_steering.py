@@ -25,7 +25,7 @@ def main() -> None:
         "-o",
         "--output_dir",
         type=str,
-        help="Directory for result CSVs (default: task_3_steering_law/results)",
+        help="Directory for result CSVs (default: task_3_steering_law/data)",
     )  # output dir
 
     # parameters - required if no config file is provided

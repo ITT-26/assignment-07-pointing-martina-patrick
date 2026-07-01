@@ -6,22 +6,23 @@
 I used Python 3.14 and the requirements-patrick.txt modules. Everything worked this way
 (at least on my machine ;))
 
+## Martina
+I used Python 3.13.2 and the requirements-martina.txt modules. 
+
 # Task 1
 
-Use task_1/launcher.py to start the application. The command line takes 2 
-optional arguments. -c or --cam which should be set to True or False and 
+Use `task_1/launcher.py` to start the application. The command line takes 2 
+optional arguments: `-c` or `--cam`. which should be set to True or False and 
 determines if opencv should display what the camera sees (recommended for debugging 
-purposes) and -cd or --cam-deadzone which should be a float between 0 and .5 and
+purposes) and `-cd` or `--cam-deadzone`, which should be a float between 0 and .5 and
 adds a deadzone to the edges of the camera where the mediapipe detection starts to
-jitter increasingly. I find that .2 seems to be an acceptable value for now.
+jitter increasingly. We found that .2 seems to be an acceptable value for now.
 
 Starting the application allows you to control the cursor with the tip of the index
-finger, pinching the thumb tip and middle finger tip will simulate a click (
-detection not 100% guaranteed, can behave wonky
-)
+finger, pinching the thumb tip and middle finger tip will simulate a left click (detection not 100% guaranteed, can behave wonky, specially under bad lighting conditions).
 
-Q can be used to quit but only when using -c True, otherwise you can use Ctrl-C. 
-If no hand is detected the cursor will be controlled by the mouse as is usual
+`q` can be used to quit but only when using `-c True`, otherwise you can use `[Ctrl] + C`. 
+If no hand is detected the cursor will be controlled by the mouse/touchpad as is usual.
 
 
 # Task 2, 3 and 4
@@ -69,7 +70,10 @@ $env:PYTHONPATH="."; py task_2_fitts_law/launcher_fitts.py -p test -n 2 -i mouse
 | `-d` / `--distance` | Distance between opposing targets (diameter of the target ring) |
 | `-r` / `--radius` | Target radius |
 | `-t` / `--num_targets` | Number of targets (even, 2–10) |
+| `-o` / `--output_dir` | Output directory for result CSVs (default: `task_2_fitts_law/data`) |
  
+> The `-o` / `--output_dir` flag works in both modes (config file or individual parameters) and lets you save results to a different directory. If used together with `-c` and the config file also specifies `output_dir`, the command-line flag takes precedence.
+
 A config file holds a `participant_id` and a list of `conditions`, so several
 conditions can be run back to back in a single session without closing the
 window. 
@@ -264,7 +268,7 @@ Here some lines about how the study went
 The visualizations for the results can be found in `task_5/results` and are 
 saved as pdfs. 
 
-We tested 4 input methods - mouse, mouse with delay, hand detection and touchpad -
+We tested 4 input methods - mouse, mouse with latency, hand detection and touchpad -
 by using a fitts law and a steering law test
 
 ### Fitts
