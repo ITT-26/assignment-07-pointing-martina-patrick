@@ -282,6 +282,8 @@ In terms of accuracy for fitts law all input methods performed well, shoing a hi
 mean accuracy and a low variance. The only outlier here is the hand, which
 has a mean accuracy of only 70% and a high variance. 
 
+### Steering
+
 ## Discussion
 
 ### Fitts
@@ -310,6 +312,8 @@ It can be argued that muscle memory does not suffer from delay and the only fact
 leading to a decreased throughput is users waiting for the pointer to arrive
 at the target before actually clicking. That takes potentially less time than the
 fingerlifting, tapping and repositioning the touchpad requires.
+
+### Steering
 
 ## Problems
 
