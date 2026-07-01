@@ -426,7 +426,7 @@ considerably for a given condition.
 ## Feedback Survey
 
 After completing both tasks, participants rated each input method using a
-survey (see Method/Procedure). Results can be seen in ([`feedback_survey.pdf`](task_5/results/feedback_survey.pdf)).
+survey (see Method/Procedure). Results can be seen in ([`feedback_survey.pdf`](task_5/results/feedback_survey.pdf)). Note: the third participant is recorded as "AAM112321" in the PDF file (we don't know why, he wrote down 'hector' originally).
 
 Mouse (no delay) scored highest or tied-highest on all three statements,
 including a unanimous top rating on "I had no problems using this input
