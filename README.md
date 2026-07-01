@@ -262,7 +262,7 @@ This does still not factor in that people learn at different rates or that some 
 tired faster than others but still sounded like the best approach given this specific 
 scenario.
 
-We can use a quesstionnaire, but it will only contain some questions that we consider 
+We can use a questionnaire, but it will only contain some questions that we consider 
 important. We will ask users to rate the following statements on likert scales from 
 1 (Strongly disagree) to 7 (strongly agree):
 - Using this input method was pleasant
@@ -309,7 +309,7 @@ Raw per-trial data for all three participants is available in the
 [`data`](task_5/data) folder (one CSV per condition). The plots referenced
 below are saved as PDFs in [`task_5/results`](task_5/results).
 
-We tested 4 input methods - mouse, mouse with latency, hand detection and touchpad -
+We tested 4 input methods - mouse, mouse with delay (latency), hand detection and touchpad -
 by using a Fitts' Law and a Steering Law test.
 
 ### Fitts
@@ -317,7 +317,7 @@ by using a Fitts' Law and a Steering Law test.
 It can be seen that the throughput ([`fitts_tp.pdf`](task_5/results/fitts_tp.pdf))
 of the mouse is the best of all tested input methods. Mouse with delay
 performs a bit worse but still manages to beat the touchpad. The hand as
-an input device performed worse than the rest. The mouse with delay shows the
+an input device performed worse than the rest. The mouse+delay shows the
 least variance of all tested methods.
 
 In terms of accuracy ([`fitts_ac.pdf`](task_5/results/fitts_ac.pdf)) for
@@ -343,7 +343,7 @@ trend against ID.
 
 Completion time ([`steering_ct.pdf`](task_5/results/steering_ct.pdf)) by
 input method shows mouse as the fastest method with the tightest spread,
-followed by mouse with delay and touchpad, which overlap considerably with
+followed by mouse+delay and touchpad, which overlap considerably with
 each other. Pose is the slowest method and also shows the widest spread.
 
 Error rate ([`steering_err.pdf`](task_5/results/steering_err.pdf)) by input
@@ -356,7 +356,7 @@ Movement time and throughput by difficulty
 ([`steering_mt_by_id.pdf`](task_5/results/steering_mt_by_id.pdf),
 [`steering_tp_by_id.pdf`](task_5/results/steering_tp_by_id.pdf)) follow the
 same ranking as above: mouse fastest / highest throughput, followed by
-touchpad and mouse with delay overlapping and crossing each other, and pose
+touchpad and mouse+delay overlapping and crossing each other, and pose
 consistently slowest / lowest throughput. Movement time for all methods
 increases with ID.
 
@@ -376,7 +376,7 @@ touchpad, using the finger as pointer and touching the thumb and middle finger
 for a click is an approach not many people have seen yet. Another factor is the 
 quality of the hand detection. Since the detection does not work perfectly it
 can very well happen for clicks to be registered on accident, for one click to 
-turn into mutliples, for a click to be not registered or for the pointer to jitter 
+turn into multiples, for a click to be not registered or for the pointer to jitter 
 and jump around right before the click, causing the user to miss the target.
 
 Users will probably have no muscle memory when using their hand and will therefore 
@@ -447,7 +447,7 @@ reliability and precision than from the underlying interaction concept.
 
 Since we only had a run with 3 participants it was basically impossible to counterbalance
 this study. Apart from that a study with 3 participants (of which 2 designed the study and
-therefore has knowledge beforehand) has little value. If at all it would be used to check
+therefore have knowledge beforehand) has little value. If at all it would be used to check
 for an initial effect or to test the setup like a pilot study.
 
 ### Issues with Procedure
